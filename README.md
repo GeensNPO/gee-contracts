@@ -64,7 +64,7 @@
 ## Overview
 GEE token system consists of multiple smart contracts written in Solidity programming language. This system allows issuing a standards-compliant custom token on the Ethereum network. This documentation explains the purpose and the realisation (including technical details) of each of these contracts.
 
-These contracts were thoroughly tested and all parts were double checked many times. If you are a smart contracts developer and see how these contracts can be optimized even better and made more efficient, please contact us.
+These contracts were thoroughly tested and all parts were double checked many times. If you are a 'smart contracts' developer and see how these contracts can be optimized even better and made more efficient, please contact us.
 
 During the following days, these contracts will continue to be updated. Before launching them on the main Ethereum network, the block numbers and hard-coded addresses will be modified.
 
