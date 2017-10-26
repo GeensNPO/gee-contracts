@@ -734,9 +734,9 @@ Allows an owner of the contract stopping the Crowdsale in case of a serious issu
 ```javascript
 function refund() external
     {
+        uint256 refund = bought[msg.sender];
         require (!isCrowdsaleActive());
         require (collected < softCapInEther);
-        uint256 refund = bought[msg.sender];
         bought[msg.sender] = 0;
         msg.sender.transfer(refund);
         Refund(msg.sender, refund);
