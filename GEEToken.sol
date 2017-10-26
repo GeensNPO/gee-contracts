@@ -1,7 +1,7 @@
 pragma solidity ^0.4.16;
 
 /*
-	@title GeeToken
+	@title GEEToken
 */
 
 import "./MigratableToken.sol";
@@ -15,10 +15,12 @@ contract GEEToken is MigratableToken {
     string public constant name = "Geens Platform Token";
     //Symbol of the token
     string public constant symbol = "GEE";
-    //Number of decimals of Gee
+    //Number of decimals of GEE
     uint8 public constant decimals = 8;
 
     //Team allocation
+    //Team wallet that will be unlocked after ICO
+    address public constant team0 = 0x3eC28367f42635098FA01dd33b9dd126247Fb4B1;
     //Team wallet that will be unlocked after 0.5 year after ICO
     address public constant team1 = 0x3eC28367f42635098FA01dd33b9dd126247Fb4B1;
     //Team wallet that will be unlocked after 1 year after ICO
@@ -32,23 +34,27 @@ contract GEEToken is MigratableToken {
     //2nd team wallet balance
     uint256 public team2Balance;
 
+    //2.4%
+    uint256 private constant team0Thousandth = 24;
     //3.6%
-    uint256 private constant team1Percent = 36;
+    uint256 private constant team1Thousandth = 36;
     //6%
-    uint256 private constant team2Percent = 60;
+    uint256 private constant team2Thousandth = 60;
     //88%
-    uint256 private constant icoAndCommunityPercent = 880;
+    uint256 private constant icoAndCommunityThousandth = 880;
     //100%
-    uint256 private constant percent100 = 1000;
+    uint256 private constant percent100Thousandth = 1000;
 
     function GEEToken() {
-        uint256 icoAndCommunityTokens = totalSupply * icoAndCommunityPercent / percent100;
+        uint256 icoAndCommunityTokens = totalSupply * icoAndCommunityThousandth / percent100Thousandth;
     	//88% of totalSupply
         balances[msg.sender] = icoAndCommunityTokens;
+        //2.4% of totalSupply
+        balances[team1] = totalSupply * team0Thousandth / percent100Thousandth;
         //3.6% of totalSupply
-        team1Balance = totalSupply * team1Percent / percent100;
+        team1Balance = totalSupply * team1Thousandth / percent100Thousandth;
         //6% of totalSupply
-        team2Balance = totalSupply * team2Percent / percent100;
+        team2Balance = totalSupply * team2Thousandth / percent100Thousandth;
 
         Transfer (this, msg.sender, icoAndCommunityTokens);
     }

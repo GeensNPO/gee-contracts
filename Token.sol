@@ -94,9 +94,7 @@ contract Token is ERC20, Pausable  {
     }
 
     /**
-     * approve should be called when allowed[_spender] == 0.
      * To increment allowed value is better to use this function to avoid 2 calls
-     * (and wait until the first transaction is mined)
      * From MonolithDAO Token.sol
      */
     function increaseApproval(address _spender, uint256 _addedValue)
@@ -149,7 +147,7 @@ contract Token is ERC20, Pausable  {
     }
 
     modifier canTransferOnCrowdsale (address _address) {
-        if (block.number < icoEnd) {
+        if (block.number <= icoEnd) {
             //Require the end of funding or msg.sender to be trusted
             require(trusted[_address]);
         }

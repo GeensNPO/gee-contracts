@@ -15,13 +15,14 @@ contract Trustable is Ownable {
 
     function Trustable() {
         trusted[msg.sender] = true;
+        AddTrusted(msg.sender);
     }
 
     //Add new trusted address
     function addTrusted(address _address)
+        external
         onlyOwner
         notZeroAddress(_address)
-        external
     {
         trusted[_address] = true;
         AddTrusted(_address);

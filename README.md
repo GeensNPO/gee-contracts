@@ -271,7 +271,7 @@ This function prohibits pausing the contract when the Crowdsale is active.
 #### **Modifiers**
 ```javascript
 modifier canTransferOnCrowdsale (address _address) {
-    if (block.number < icoEnd) {
+    if (block.number <= icoEnd) {
         //Require the end of funding or msg.sender to be trusted
         require(trusted[_address]);
     }
@@ -319,6 +319,12 @@ Token has 8 decimal places. It cannot be changed later.
 <br>
 <br>
 ```javascript
+address public constant team0 = 0x3eC28367f42635098FA01dd33b9dd126247Fb4B1;
+```
+The zero address of the team that receives 2.4% of tokens.
+<br>
+<br>
+```javascript
 address public constant team1 = 0x3eC28367f42635098FA01dd33b9dd126247Fb4B1;
 ```
 The first address of the team that receives 3.6% of tokens that can only be spent after the half of the year.
@@ -355,25 +361,31 @@ Indicates how many tokens a second wallet of the team has.
 <br>
 <br>
 ```javascript
-uint256 constant team1Percent = 36;
+uint256 constant team0Thousandth = 24;
+```
+2.4%
+<br>
+<br>
+```javascript
+uint256 constant team1Thousandth = 36;
 ```
 3.6%
 <br>
 <br>
 ```javascript
-uint256 constant team2Percent = 60;
+uint256 constant team2Thousandth = 60;
 ```
 6%
 <br>
 <br>
 ```javascript
-uint256 constant icoAndCommunityPercent = 880;
+uint256 constant icoAndCommunityThousandth = 880;
 ```
 88%
 <br>
 <br>
 ```javascript
-uint256 constant percent100 = 1000;
+uint256 constant percent100Thousandth = 1000;
 ```
 100%
 <br>
@@ -381,14 +393,16 @@ uint256 constant percent100 = 1000;
 
 #### **Functions**
 ```javascript
- function GEEToken() {
-        uint256 icoAndCommunityTokens = totalSupply * icoAndCommunityPercent / percent100;
+function GEEToken() {
+        uint256 icoAndCommunityTokens = totalSupply * icoAndCommunityThousandth / percent100Thousandth;
     	//88% of totalSupply
         balances[msg.sender] = icoAndCommunityTokens;
+        //2.4% of totalSupply
+        balances[team1] = totalSupply * team0Thousandth / percent100Thousandth;
         //3.6% of totalSupply
-        team1Balance = totalSupply * team1Percent / percent100;
+        team1Balance = totalSupply * team1Thousandth / percent100Thousandth;
         //6% of totalSupply
-        team2Balance = totalSupply * team2Percent / percent100;
+        team2Balance = totalSupply * team2Thousandth / percent100Thousandth;
 
         Transfer (this, msg.sender, icoAndCommunityTokens);
     }
@@ -429,13 +443,13 @@ A contract that is responsible for handling the Crowdsale operations. It accepts
 <br>
 #### **Variables**
 ```javascript
-uint256 public sold;
+uint256 public soldTokens;
 ```
 Counts how many tokens are sold.
 <br>
 <br>
 ```javascript
-uint256 public hardCapInToken = 67 * (10**6) * (10**8);
+uint256 public hardCapInTokens = 67 * (10**6) * (10**8);
 ```
 Hard Cap of the Crowdsale is 67 million (67% of total amount of tokens). This is the maximum amount of tokens that could be issued.
 <br>
@@ -549,7 +563,7 @@ The total amount of Ether collected during the Crowdsale.
 <br>
 <br>
 ```javascript
-bool public stopped = false;
+bool public stopped;
 ```
 Indicates whether the Crowdsale is stopped or not.
 <br>
@@ -594,12 +608,12 @@ Before deploying this contract, Token contract must already be deployed. After t
 <br>
 <br>
 ```javascript
-function() payable {
-    if (isCrowdsaleActive()) {
-        buy();
-    } else {
-        require (msg.sender == owner);
-    }
+function() external payable {
+        if (isCrowdsaleActive()) {
+            buy();
+        } else { //after crowdsale owner can send back eth for refund
+            require (msg.sender == owner);
+        }
 }
 ```
 A Fallback function that is called when someone sends Ether to the contract.
@@ -620,13 +634,13 @@ A function that allows an owner of the contract changing address where collected
 <br>
 ```javascript
 function finalize() external  {
-    if (sold < (hardCap - gee100)) {
-        require(block.number > endBlockNumber);
+        require(soldTokens != hardCapInTokens);
+        if (soldTokens < (hardCapInTokens - gee100)) {
+            require(block.number > endBlockNumber);
+        }
+        gee.burn(hardCapInTokens.SUB(soldTokens));
+        hardCapInTokens = soldTokens;
     }
-    require(sold != hardCap);
-    gee.burn(hardCap.SUB(sold));
-    hardCap = sold;
-}
 ```
 If the Crowdsale ends and the hard cap is not reached, this functions burns the unsold tokens.
 <br>
@@ -639,10 +653,6 @@ function buy()
         uint256 amountWei = msg.value;
         uint256 blocks = block.number;
 
-        //Is crowdsale started
-        require(startBlockNumber <= blocks);
-        //Is crowdsale ended
-        require(endBlockNumber >= blocks);
         //Ether limitation
         require(amountWei >= minEther);
         require(amountWei <= maxEther);
@@ -650,12 +660,12 @@ function buy()
         price = getPrice();
         //Count how many GEE sender can buy
         uint256 amount = amountWei / price;
-        //Add amount to sold
-        sold = sold.ADD(amount);
+        //Add amount to soldTokens
+        soldTokens = soldTokens.ADD(amount);
 
-        require(sold <= hardCapInToken);
+        require(soldTokens <= hardCapInTokens);
 
-        if (sold == hardCapInToken) {
+        if (soldTokens == hardCapInTokens) {
             endBlockNumber = blocks;
         }
 
@@ -666,8 +676,9 @@ function buy()
         //Transfer amount of Gee coins to msg.sender
         gee.transfer(msg.sender, amount);
 
-        //Transfer contract Ether to Geens
+        //Transfer contract Ether to fund
         fund.transfer(this.balance);
+
         Buy(msg.sender, amount, price);
     }
 
@@ -693,19 +704,19 @@ c) Crowdsale has been stopped due to emergency situation
 <br>
 ```javascript
 function getPrice()
-internal
-constant
-returns (uint256)
-{
-    if (block.number >= tier4) {
-        return tier4Price;
-    } else if (block.number >= tier3){
-        return tier3Price;
-    } else if (block.number >= tier2){
-        return tier2Price;
-    }
+    internal
+    constant
+    returns (uint256)
+    {
+        if (block.number < tier2) {
+            return tier1Price;
+        } else if (block.number < tier3){
+            return tier2Price;
+        } else if (block.number < tier4){
+            return tier3Price;
+        }
 
-    return tier1Price;
+        return tier4Price;
 }
 ```
 Calculates which tier is currently active and returns the corresponding price.
@@ -722,14 +733,14 @@ Allows an owner of the contract stopping the Crowdsale in case of a serious issu
 <br>
 ```javascript
 function refund() external
-{
-    uint256 refund = bought[msg.sender];
-    require (!isCrowdsaleActive());
-    require (collected < softCap);
-    msg.sender.transfer(refund);
-    bought[msg.sender] = 0;
-    Refund(msg.sender, refund);
-}
+    {
+        require (!isCrowdsaleActive());
+        require (collected < softCapInEther);
+        uint256 refund = bought[msg.sender];
+        bought[msg.sender] = 0;
+        msg.sender.transfer(refund);
+        Refund(msg.sender, refund);
+    }
 ```
 A function that allows contributors receive their contributions back in case a soft cap is not reached or the Crowdsale was stopped due to an emergency situation.
 <br>
@@ -762,22 +773,23 @@ The event that is triggered when a new owner is assigned to the contract. The in
 <br>
 #### **Functions**
 ```javascript
-function Ownable() {
-    owner = msg.sender;
-}
+    function Ownable() {
+        owner = msg.sender;
+        OwnershipTransferred (address(0), owner);
+    }
 ```
 A constructor that is called upon creation of the contract. It assigns the ownership of this contract to the creator.
 <br>
 <br>
 ```javascript
-function transferOwnership(address _newOwner)
-    public
-    onlyOwner
-    notZeroAddress(_newOwner)
-{
-    owner = _newOwner;
-    OwnershipTransferred(owner, _newOwner);
-}
+    function transferOwnership(address _newOwner)
+        public
+        onlyOwner
+        notZeroAddress(_newOwner)
+    {
+        owner = _newOwner;
+        OwnershipTransferred(msg.sender, _newOwner);
+    }
 ```
 A function that allows current owner of the contract transferring the ownership to another address.
 <br>
@@ -832,6 +844,7 @@ The event that is triggered when a trusted address is unassigned. The indexed pa
 ```javascript
 function Trustable() {
     trusted[msg.sender] = true;
+    AddTrusted(msg.sender);
 }
 ```
 The creator of the contract is initially added to the trusted addresses list.
@@ -839,9 +852,9 @@ The creator of the contract is initially added to the trusted addresses list.
 <br>
 ```javascript
 function addTrusted(address _address)
+        external
         onlyOwner
         notZeroAddress(_address)
-        external
 {
         trusted[_address] = true;
         AddTrusted(_address);
@@ -873,7 +886,7 @@ This contract allows pausing the contract in case of emergency situation. It als
 
 #### **Variables**
 ```javascript
-bool public paused = false;
+bool public paused;
 ```
 Indicates whether the contract is paused or not.
 <br>
@@ -1015,14 +1028,19 @@ If migration is enabled, transfer the balance from the old contract to the new o
 <br>
 <br>
 ```javascript
-function setMigrateAgent(MigrateAgent _agent) onlyOwner notZeroAddress(_agent) afterCrowdsale external {
-    //cannot interrupt migrating
-    require(getMigrateState() != MigrateState.Migrating);
-    //set migrate agent
-    migrateAgent = _agent;
-    //Emit event
-    MigrateAgentSet(migrateAgent);
-}
+ function setMigrateAgent(MigrateAgent _agent)
+        external
+        onlyOwner
+        notZeroAddress(_agent)
+        afterCrowdsale
+    {
+        //cannot interrupt migrating
+        require(getMigrateState() != MigrateState.Migrating);
+        //set migrate agent
+        migrateAgent = _agent;
+        //Emit event
+        MigrateAgentSet(migrateAgent);
+    }
 ```
 Set a reference to the new Token. This is only possible when the migration has not already been started.
 <br>

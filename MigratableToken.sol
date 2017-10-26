@@ -57,7 +57,12 @@ contract MigratableToken is Token {
     /*
         Set migrating agent and start migrating
     */
-    function setMigrateAgent(MigrateAgent _agent) onlyOwner notZeroAddress(_agent) afterCrowdsale external {
+    function setMigrateAgent(MigrateAgent _agent)
+        external
+        onlyOwner
+        notZeroAddress(_agent)
+        afterCrowdsale
+    {
         //cannot interrupt migrating
         require(getMigrateState() != MigrateState.Migrating);
         //set migrate agent

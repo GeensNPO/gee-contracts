@@ -9,9 +9,9 @@ import "./SafeMath.sol";
 */
 contract Token {
 
-    function transfer(address _to, uint256 _value);
+    function transfer(address _to, uint256 _value) external;
 
-    function burn(uint256 _value);
+    function burn(uint256 _value) external;
 
 }
 
@@ -19,10 +19,10 @@ contract Crowdsale is Ownable {
 
     using SafeMath for uint256;
 
-    //Counts how many Gee coins are sold
-    uint256 public sold;
+    //Counts how many Gee coins are soldTokens
+    uint256 public soldTokens;
     //Hard cap in Gee coins (with 8 decimals)
-    uint256 public hardCapInToken = 67 * (10**6) * (10**8);
+    uint256 public hardCapInTokens = 67 * (10**6) * (10**8);
     //Min amount of Ether
     uint256 public constant minEther = 0.03 ether;
     //Max amount of Ether
@@ -45,7 +45,7 @@ contract Crowdsale is Ownable {
     //Start + 30 days
     uint256 public endBlockNumber = startBlockNumber.ADD(day.MUL(30));
 
-    //Price at the beginning
+    //GEE price
     uint256 public price;
     //Price in 1st tier
     uint256 public constant tier1Price = 6000000;
@@ -66,15 +66,17 @@ contract Crowdsale is Ownable {
     //saves how mush ETH was collected
     uint256 public collected;
 
-    //
-    bool public stopped = false;
+    //to check if ICO is stopped
+    bool public stopped;
 
 
     uint256 public constant gee100 = 100 * (10**8);
 
     //Keep track of buyings
     event Buy (address indexed _who, uint256 _amount, uint256 indexed _price);
+    //Keep track of fund addresses
     event ChangeFund (address indexed _fund);
+    //Keep track of refunding
     event Refund (address indexed _who, uint256 _amount);
 
     //Payable - can store ETH
@@ -88,7 +90,7 @@ contract Crowdsale is Ownable {
     /*
         Fallback function is called when Ether is sent to the contract
     */
-    function() payable {
+    function() external payable {
         if (isCrowdsaleActive()) {
             buy();
         } else { //after crowdsale owner can send back eth for refund
@@ -110,15 +112,15 @@ contract Crowdsale is Ownable {
 
 
     /*
-        Get unsold Gee coins when the Crowdsale ended
+        Burn unsold GEE after crowdsale
     */
     function finalize() external  {
-        if (sold < (hardCapInToken - gee100)) {
+        require(soldTokens != hardCapInTokens);
+        if (soldTokens < (hardCapInTokens - gee100)) {
             require(block.number > endBlockNumber);
         }
-        require(sold != hardCapInToken);
-        gee.burn(hardCapInToken.SUB(sold));
-        hardCapInToken = sold;
+        gee.burn(hardCapInTokens.SUB(soldTokens));
+        hardCapInTokens = soldTokens;
     }
 
 
@@ -129,10 +131,6 @@ contract Crowdsale is Ownable {
         uint256 amountWei = msg.value;
         uint256 blocks = block.number;
 
-        //Is crowdsale started
-        require(startBlockNumber <= blocks);
-        //Is crowdsale ended
-        require(endBlockNumber >= blocks);
         //Ether limitation
         require(amountWei >= minEther);
         require(amountWei <= maxEther);
@@ -140,12 +138,12 @@ contract Crowdsale is Ownable {
         price = getPrice();
         //Count how many GEE sender can buy
         uint256 amount = amountWei / price;
-        //Add amount to sold
-        sold = sold.ADD(amount);
+        //Add amount to soldTokens
+        soldTokens = soldTokens.ADD(amount);
 
-        require(sold <= hardCapInToken);
+        require(soldTokens <= hardCapInTokens);
 
-        if (sold == hardCapInToken) {
+        if (soldTokens == hardCapInTokens) {
             endBlockNumber = blocks;
         }
 
@@ -156,8 +154,9 @@ contract Crowdsale is Ownable {
         //Transfer amount of Gee coins to msg.sender
         gee.transfer(msg.sender, amount);
 
-        //Transfer contract Ether to Geens
+        //Transfer contract Ether to fund
         fund.transfer(this.balance);
+
         Buy(msg.sender, amount, price);
     }
 
@@ -181,27 +180,27 @@ contract Crowdsale is Ownable {
     constant
     returns (uint256)
     {
-        if (block.number >= tier4) {
-            return tier4Price;
-        } else if (block.number >= tier3){
-            return tier3Price;
-        } else if (block.number >= tier2){
+        if (block.number < tier2) {
+            return tier1Price;
+        } else if (block.number < tier3){
             return tier2Price;
+        } else if (block.number < tier4){
+            return tier3Price;
         }
 
-        return tier1Price;
+        return tier4Price;
     }
 
-    function stopInEmergency () external onlyOwner {
+    function stopInEmergency() external onlyOwner {
         require (!stopped);
         stopped = true;
     }
 
     function refund() external
     {
-        uint256 refund = bought[msg.sender];
         require (!isCrowdsaleActive());
-        require (collected < softCapInEther || stopped);
+        require (collected < softCapInEther);
+        uint256 refund = bought[msg.sender];
         bought[msg.sender] = 0;
         msg.sender.transfer(refund);
         Refund(msg.sender, refund);

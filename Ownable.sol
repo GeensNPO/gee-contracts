@@ -13,6 +13,7 @@ contract Ownable {
 
     function Ownable() {
         owner = msg.sender;
+        OwnershipTransferred (address(0), owner);
     }
 
     function transferOwnership(address _newOwner)
@@ -21,7 +22,7 @@ contract Ownable {
         notZeroAddress(_newOwner)
     {
         owner = _newOwner;
-        OwnershipTransferred(owner, _newOwner);
+        OwnershipTransferred(msg.sender, _newOwner);
     }
 
     //Only owner can call function
