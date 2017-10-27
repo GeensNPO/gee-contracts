@@ -15,6 +15,7 @@ contract Token {
 
 }
 
+
 contract Crowdsale is Ownable {
 
     using SafeMath for uint256;
@@ -24,43 +25,43 @@ contract Crowdsale is Ownable {
     //Hard cap in Gee coins (with 8 decimals)
     uint256 public hardCapInTokens = 67 * (10**6) * (10**8);
     //Min amount of Ether
-    uint256 public constant minEther = 0.03 ether;
+    uint256 public constant MIN_ETHER = 0.03 ether;
     //Max amount of Ether
-    uint256 public constant maxEther = 1000 ether;
+    uint256 public constant MAX_ETHER = 1000 ether;
 
     //Address where funds are forwarded during the ICO
     address fund = 0x77E32B38a4AfdAb4dA3863a1de198809170644Df;
 
-    //Mined blocks per day
-    uint256 public constant day = 5082;
+    //Mined blocks per DAY
+    uint256 public constant DAY = 5082;
 
     //Start block
-    uint256 public constant startBlockNumber = 4506960;
+    uint256 public constant START_BLOCK_NUMBER = 4506960;
     //Start + 3 days
-    uint256 public tier2 = startBlockNumber.ADD(day.MUL(3));
+    uint256 public TIER2 = START_BLOCK_NUMBER.ADD(DAY.MUL(3));
     //Start + 10 days ( 3 days + 7 days)
-    uint256 public tier3 = startBlockNumber.ADD(day.MUL(10));
+    uint256 public TIER3 = START_BLOCK_NUMBER.ADD(DAY.MUL(10));
     //Start + 20 days ( 3 days + 7 days + 10 days)
-    uint256 public tier4 = startBlockNumber.ADD(day.MUL(20));
+    uint256 public TIER4 = START_BLOCK_NUMBER.ADD(DAY.MUL(20));
     //Start + 30 days
-    uint256 public endBlockNumber = startBlockNumber.ADD(day.MUL(30));
+    uint256 public endBlockNumber = START_BLOCK_NUMBER.ADD(DAY.MUL(30));
 
     //GEE price
     uint256 public price;
     //Price in 1st tier
-    uint256 public constant tier1Price = 6000000;
+    uint256 public constant TIER1_PRICE = 6000000;
     //Price in 2nd tier
-    uint256 public constant tier2Price = 6700000;
+    uint256 public constant TIER2_PRICE = 6700000;
     //Price in 3rd tier
-    uint256 public constant tier3Price = 7400000;
+    uint256 public constant TIER3_PRICE = 7400000;
     //Price in 4th tier
-    uint256 public constant tier4Price = 8200000;
+    uint256 public constant TIER4_PRICE = 8200000;
 
     //GeeToken contract
     Token public gee;
 
     //softcap in ETH
-    uint256 public constant softCapInEther = 13500 ether;
+    uint256 public constant SOFT_CAP_IN_ETHER = 13500 ether;
     //saves how mush ETH user spent on GEE
     mapping (address => uint256) public bought;
     //saves how mush ETH was collected
@@ -70,7 +71,7 @@ contract Crowdsale is Ownable {
     bool public stopped;
 
 
-    uint256 public constant gee100 = 100 * (10**8);
+    uint256 public constant GEE100 = 100 * (10**8);
 
     //Keep track of buyings
     event Buy (address indexed _who, uint256 _amount, uint256 indexed _price);
@@ -101,6 +102,7 @@ contract Crowdsale is Ownable {
     /*
         Owner can change fund address
     */
+
     function changeFund(address _fund)
     external
     notZeroAddress(_fund)
@@ -110,19 +112,18 @@ contract Crowdsale is Ownable {
         ChangeFund (_fund);
     }
 
-
     /*
         Burn unsold GEE after crowdsale
     */
-    function finalize() external  {
+
+    function finalize() external {
         require(soldTokens != hardCapInTokens);
-        if (soldTokens < (hardCapInTokens - gee100)) {
+        if (soldTokens < (hardCapInTokens - GEE100)) {
             require(block.number > endBlockNumber);
         }
         gee.burn(hardCapInTokens.SUB(soldTokens));
         hardCapInTokens = soldTokens;
     }
-
 
     function buy()
     public
@@ -132,8 +133,8 @@ contract Crowdsale is Ownable {
         uint256 blocks = block.number;
 
         //Ether limitation
-        require(amountWei >= minEther);
-        require(amountWei <= maxEther);
+        require(amountWei >= MIN_ETHER);
+        require(amountWei <= MAX_ETHER);
 
         price = getPrice();
         //Count how many GEE sender can buy
@@ -160,13 +161,13 @@ contract Crowdsale is Ownable {
         Buy(msg.sender, amount, price);
     }
 
-
     /*
         Function returns if Crowdsale is ongoing
     */
+
     function isCrowdsaleActive() public constant returns (bool) {
 
-        if (endBlockNumber < block.number || stopped || startBlockNumber > block.number){
+        if (endBlockNumber < block.number || stopped || START_BLOCK_NUMBER > block.number) {
             return false;
         }
         return true;
@@ -180,15 +181,15 @@ contract Crowdsale is Ownable {
     constant
     returns (uint256)
     {
-        if (block.number < tier2) {
-            return tier1Price;
-        } else if (block.number < tier3){
-            return tier2Price;
-        } else if (block.number < tier4){
-            return tier3Price;
+        if (block.number < TIER2) {
+            return TIER1_PRICE;
+        } else if (block.number < TIER3) {
+            return TIER2_PRICE;
+        } else if (block.number < TIER4) {
+            return TIER3_PRICE;
         }
 
-        return tier4Price;
+        return TIER4_PRICE;
     }
 
     function stopInEmergency() external onlyOwner {
@@ -196,11 +197,10 @@ contract Crowdsale is Ownable {
         stopped = true;
     }
 
-    function refund() external
-    {
+    function refund() external {
         uint256 refund = bought[msg.sender];
         require (!isCrowdsaleActive());
-        require (collected < softCapInEther);
+        require (collected < SOFT_CAP_IN_ETHER);
         bought[msg.sender] = 0;
         msg.sender.transfer(refund);
         Refund(msg.sender, refund);
