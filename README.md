@@ -2,7 +2,7 @@
 
 ---
 
-**Last updated:** October 24, 2017
+**Last updated:** October 27, 2017
 
 ---
 
@@ -112,7 +112,7 @@ Total supply of tokens is 100 million.
 <br>
 <br>
 ```javascript
-uint256 public constant icoEnd = 222222222;
+    uint256 public constant ICO_END = 222222222;
 ```
 A block number that indicates when the Crowdsale ends.
 <br>
@@ -271,7 +271,7 @@ This function prohibits pausing the contract when the Crowdsale is active.
 #### **Modifiers**
 ```javascript
 modifier canTransferOnCrowdsale (address _address) {
-    if (block.number <= icoEnd) {
+    if (block.number <= ICO_END) {
         //Require the end of funding or msg.sender to be trusted
         require(trusted[_address]);
     }
@@ -283,7 +283,7 @@ Only trusted addresses can call functions that are marked with this modifier.
 <br>
 ```javascript
 modifier afterCrowdsale {
-    require(block.number >= icoEnd);
+    require(block.number > ICO_END);
     _;
 }
 ```
@@ -319,31 +319,31 @@ Token has 8 decimal places. It cannot be changed later.
 <br>
 <br>
 ```javascript
-address public constant team0 = 0x3eC28367f42635098FA01dd33b9dd126247Fb4B1;
+address public constant TEAM0 = 0x3eC28367f42635098FA01dd33b9dd126247Fb4B1;
 ```
 The zero address of the team that receives 2.4% of tokens.
 <br>
 <br>
 ```javascript
-address public constant team1 = 0x3eC28367f42635098FA01dd33b9dd126247Fb4B1;
+address public constant TEAM1 = 0x3eC28367f42635098FA01dd33b9dd126247Fb4B1;
 ```
 The first address of the team that receives 3.6% of tokens that can only be spent after the half of the year.
 <br>
 <br>
 ```javascript
-address public constant team2 = 0xE2832C2Ff2754923B3172474F149630823ecb8D6;
+address public constant TEAM2 = 0xE2832C2Ff2754923B3172474F149630823ecb8D6;
 ```
 Second address of the team that receives 6% of tokens that can only be spent after the year.
 <br>
 <br>
 ```javascript
-uint256 public constant blockTeam1 = 1835640;
+uint256 public constant BLOCK_TEAM1 = 1835640;
 ```
 A block number when the first team wallet's tokens are unlocked.
 <br>
 <br>
 ```javascript
-uint256 public constant blockTeam2 = 1835650;
+uint256 public constant BLOCK_TEAM2 = 1835650;
 ```
 A block number when the second team wallet's tokens are unlocked.
 <br>
@@ -361,31 +361,31 @@ Indicates how many tokens a second wallet of the team has.
 <br>
 <br>
 ```javascript
-uint256 constant team0Thousandth = 24;
+uint256 private constant TEAM0_THOUSANDTH = 24;
 ```
 2.4%
 <br>
 <br>
 ```javascript
-uint256 constant team1Thousandth = 36;
+uint256 private constant TEAM1_THOUSANDTH = 36;
 ```
 3.6%
 <br>
 <br>
 ```javascript
-uint256 constant team2Thousandth = 60;
+uint256 private constant TEAM1_THOUSANDTH = 36;
 ```
 6%
 <br>
 <br>
 ```javascript
-uint256 constant icoAndCommunityThousandth = 880;
+uint256 private constant ICO_AND_COMMUNITY_THOUSANDTH = 880;
 ```
 88%
 <br>
 <br>
 ```javascript
-uint256 constant percent100Thousandth = 1000;
+uint256 private constant DENOMINATOR = 1000;
 ```
 100%
 <br>
@@ -394,39 +394,39 @@ uint256 constant percent100Thousandth = 1000;
 #### **Functions**
 ```javascript
 function GEEToken() {
-        uint256 icoAndCommunityTokens = totalSupply * icoAndCommunityThousandth / percent100Thousandth;
-    	//88% of totalSupply
-        balances[msg.sender] = icoAndCommunityTokens;
-        //2.4% of totalSupply
-        balances[team1] = totalSupply * team0Thousandth / percent100Thousandth;
-        //3.6% of totalSupply
-        team1Balance = totalSupply * team1Thousandth / percent100Thousandth;
-        //6% of totalSupply
-        team2Balance = totalSupply * team2Thousandth / percent100Thousandth;
+    uint256 icoAndCommunityTokens = totalSupply * ICO_AND_COMMUNITY_THOUSANDTH / DENOMINATOR;
+	//88% of totalSupply
+     balances[msg.sender] = icoAndCommunityTokens;
+    //2.4% of totalSupply
+    balances[TEAM0] = totalSupply * TEAM0_THOUSANDTH / DENOMINATOR;
+    //3.6% of totalSupply
+    team1Balance = totalSupply * TEAM1_THOUSANDTH / DENOMINATOR;
+     //6% of totalSupply
+    team2Balance = totalSupply * TEAM2_THOUSANDTH / DENOMINATOR;
 
-        Transfer (this, msg.sender, icoAndCommunityTokens);
-    }
-
+    Transfer (this, msg.sender, icoAndCommunityTokens);
+}
 ```
 Upon creation of the contract, 88% of tokens are allocated to the owner of the contract, 3.6% to the first team wallet and 6% to the second team wallet.
 <br>
 <br>
 ```javascript
-function unlockTeamTokens(address _address) external onlyOwner  {
-        if (_address == team1) {
-            require(blockTeam1 <= block.number);
-            require (team1Balance > 0);
-            balances[team1] = team1Balance;
-            team1Balance = 0;
-            Transfer (this, team1, team1Balance);
-        } else if (_address == team2) {
-            require(blockTeam2 <= block.number);
-            require (team2Balance > 0);
-            balances[team2] = team2Balance;
-            team2Balance = 0;
-            Transfer (this, team2, team2Balance);
-        }
+function unlockTeamTokens(address _address) external onlyOwner {
+    if (_address == TEAM1) {
+        require(BLOCK_TEAM1 <= block.number);
+        require (team1Balance > 0);
+        balances[TEAM1] = team1Balance;
+        team1Balance = 0;
+        Transfer (this, TEAM1, team1Balance);
+    } else if (_address == TEAM2) {
+        require(BLOCK_TEAM2 <= block.number);
+        require (team2Balance > 0);
+        balances[TEAM2] = team2Balance;
+        team2Balance = 0;
+        Transfer (this, TEAM2, team2Balance);
     }
+}
+
 
 ```
 A function that allows an owner of the contract unlocking tokens for the team wallet when specified block number is reached. Tokens are transferred to a specified wallet.
@@ -455,13 +455,13 @@ Hard Cap of the Crowdsale is 67 million (67% of total amount of tokens). This is
 <br>
 <br>
 ```javascript
-uint256 public constant minEther = 0.03 ether;
+uint256 public constant MIN_ETHER = 0.03 ether;
 ```
 A minimum contribution in Ether.
 <br>
 <br>
 ```javascript
-uint256 public constant maxEther = 1000 ether;
+uint256 public constant MAX_ETHER = 1000 ether;
 ```
 A maximum contribution in Ether.
 <br>
@@ -473,37 +473,37 @@ An address where the received Ether is forwarded.
 <br>
 <br>
 ```javascript
-uint256 public constant day = 5082;
+uint256 public constant DAY = 5082;
 ```
 Indicates how many blocks are mined per day.
 <br>
 <br>
 ```javascript
-uint256 public constant startBlockNumber = 4506960;
+uint256 public constant START_BLOCK_NUMBER = 4506960;
 ```
 A number of the block when the Crowdsale should start.
 <br>
 <br>
 ```javascript
-uint256 public tier2 = startBlockNumber.ADD(day.MUL(3));
+uint256 public TIER2 = START_BLOCK_NUMBER.ADD(DAY.MUL(3));
 ```
 A number of the block when the tier2Price price should be active.
 <br>
 <br>
 ```javascript
-uint256 public tier3 = startBlockNumber.ADD(day.MUL(10));
+uint256 public TIER3 = START_BLOCK_NUMBER.ADD(DAY.MUL(10));
 ```
 A number of the block when the tier3Price price should be active.
 <br>
 <br>
 ```javascript
-uint256 public tier4 = startBlockNumber.ADD(day.MUL(20));
+uint256 public TIER4 = START_BLOCK_NUMBER.ADD(DAY.MUL(20));
 ```
 A number of the block when the tier4Price price should be active.
 <br>
 <br>
 ```javascript
-uint256 public endBlockNumber = startBlockNumber.ADD(day.MUL(30));
+uint256 public endBlockNumber = START_BLOCK_NUMBER.ADD(DAY.MUL(30));
 ```
 A number of the block when the Crowdsale should end.
 <br>
@@ -515,25 +515,25 @@ A price (in Wei) of one token.
 <br>
 <br>
 ```javascript
-uint256 public constant tier1Price = 6000000;
+uint256 public constant TIER1_PRICE = 6000000;
 ```
 A price (in Wei) of one token (when tier1 is active).
 <br>
 <br>
 ```javascript
-uint256 public constant tier2Price = 6700000;
+uint256 public constant TIER2_PRICE = 6700000;
 ```
 A price (in Wei) of one token (when tier2 is active).
 <br>
 <br>
 ```javascript
-uint256 public constant tier3Price = 7400000;
+uint256 public constant TIER3_PRICE = 7400000;
 ```
 A price (in Wei) of one token (when tier3 is active).
 <br>
 <br>
 ```javascript
-uint256 public constant tier4Price = 8200000;
+uint256 public constant TIER4_PRICE = 8200000;
 ```
 A price (in Wei) of one token (when tier4 is active).
 <br>
@@ -545,7 +545,7 @@ Reference to the Token contract.
 <br>
 <br>
 ```javascript
-uint256 public constant softCapInEther = 13500 ether;
+uint256 public constant SOFT_CAP_IN_ETHER = 13500 ether;
 ```
 Soft Cap of the Crowdsale is 13'500 Ether. If the soft cap is not reached, contributors will be able to refund their Ether.
 <br>
@@ -569,7 +569,7 @@ Indicates whether the Crowdsale is stopped or not.
 <br>
 <br>
 ```javascript
-uint256 public constant gee100 = 100 * (10**8);
+uint256 public constant GEE100 = 100 * (10**8);
 ```
 A constant corresponding to 100 GEE tokens.
 <br>
@@ -635,7 +635,7 @@ A function that allows an owner of the contract changing address where collected
 ```javascript
 function finalize() external  {
         require(soldTokens != hardCapInTokens);
-        if (soldTokens < (hardCapInTokens - gee100)) {
+        if (soldTokens < (hardCapInTokens - GEE100)) {
             require(block.number > endBlockNumber);
         }
         gee.burn(hardCapInTokens.SUB(soldTokens));
@@ -646,7 +646,7 @@ If the Crowdsale ends and the hard cap is not reached, this functions burns the 
 <br>
 <br>
 ```javascript
-function buy()
+    function buy()
     public
     payable
     {
@@ -654,8 +654,8 @@ function buy()
         uint256 blocks = block.number;
 
         //Ether limitation
-        require(amountWei >= minEther);
-        require(amountWei <= maxEther);
+        require(amountWei >= MIN_ETHER);
+        require(amountWei <= MAX_ETHER);
 
         price = getPrice();
         //Count how many GEE sender can buy
@@ -689,7 +689,7 @@ A function responsible for issuing tokens for a contributor. The minimum amount 
 ```javascript
 function isCrowdsaleActive() public constant returns (bool) {
 
-        if (endBlockNumber < block.number || stopped || startBlockNumber > block.number){
+        if (endBlockNumber < block.number || stopped || START_BLOCK_NUMBER > block.number){
             return false;
         }
         return true;
@@ -708,15 +708,15 @@ function getPrice()
     constant
     returns (uint256)
     {
-        if (block.number < tier2) {
-            return tier1Price;
-        } else if (block.number < tier3){
-            return tier2Price;
-        } else if (block.number < tier4){
-            return tier3Price;
-        }
-
-        return tier4Price;
+     if (block.number < TIER2) {
+        return TIER1_PRICE;
+    } else if (block.number < TIER3) {
+        return TIER2_PRICE;
+    } else if (block.number < TIER4) {
+        return TIER3_PRICE;
+    }
+        
+    return TIER4_PRICE;
 }
 ```
 Calculates which tier is currently active and returns the corresponding price.
@@ -736,7 +736,7 @@ function refund() external
     {
         uint256 refund = bought[msg.sender];
         require (!isCrowdsaleActive());
-        require (collected < softCapInEther);
+        require (collected < SOFT_CAP_IN_ETHER);
         bought[msg.sender] = 0;
         msg.sender.transfer(refund);
         Refund(msg.sender, refund);
@@ -1047,7 +1047,7 @@ Set a reference to the new Token. This is only possible when the migration has n
 <br>
 ```javascript
 function getMigrateState() public constant returns (MigrateState) {
-    if (block.number < icoEnd) {
+    if (block.number <= ICO_END) {
         //Migration is not allowed on funding
         return MigrateState.NotAllowed;
     } else if (address(migrateAgent) == address(0)) {

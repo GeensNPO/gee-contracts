@@ -4,6 +4,7 @@ import "./Trustable.sol";
 
 contract Pausable is Trustable {
 
+
     //To check if Token is paused
     bool public paused;
     //Block number on pause

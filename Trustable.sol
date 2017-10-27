@@ -7,6 +7,7 @@ import "./Ownable.sol";
 */
 contract Trustable is Ownable {
 
+
     //Only trusted addresses are able to transfer tokens during the Crowdsale
     mapping (address => bool) trusted;
 

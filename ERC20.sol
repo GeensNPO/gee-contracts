@@ -1,11 +1,13 @@
 pragma solidity ^0.4.16;
-
 /*
 	ERC20 Token Standart
 	https://github.com/ethereum/EIPs/issues/20
 	https://theethereum.wiki/w/index.php/ERC20_Token_Standard
 */
+
+
 contract ERC20 {
+
 
     event Transfer(address indexed _from, address indexed _to, uint256 _value);
 

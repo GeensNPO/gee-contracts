@@ -1,6 +1,5 @@
 pragma solidity ^0.4.16;
 
-import "./SafeMath.sol";
 import "./Token.sol";
 
 /*
@@ -18,8 +17,6 @@ contract MigrateAgent {
 }
 
 contract MigratableToken is Token {
-
-    using SafeMath for uint256;
     
     MigrateAgent public migrateAgent;
 
@@ -75,7 +72,7 @@ contract MigratableToken is Token {
         Migrating status
     */
     function getMigrateState() public constant returns (MigrateState) {
-        if (block.number < icoEnd) {
+        if (block.number <= ICO_END) {
             //Migration is not allowed on funding
             return MigrateState.NotAllowed;
         } else if (address(migrateAgent) == address(0)) {
