@@ -6,6 +6,7 @@ pragma solidity ^0.4.16;
  */
 library SafeMath {
 
+
     /*
         @return sum of a and b
     */
@@ -18,7 +19,7 @@ library SafeMath {
     /*
         @return difference of a and b
     */
-    function SUB (uint256 a, uint256 b) internal returns (uint256)  {
+    function SUB (uint256 a, uint256 b) internal returns (uint256) {
         assert(a >= b);
         return a - b;
     }
@@ -26,7 +27,7 @@ library SafeMath {
     /*
         @return multiples a and b
     */
-    function MUL (uint256 a, uint256 b) internal returns (uint256)  {
+    function MUL (uint256 a, uint256 b) internal returns (uint256) {
         uint256 c = a * b;
         assert(a == 0 || c / a == b);
         return c;

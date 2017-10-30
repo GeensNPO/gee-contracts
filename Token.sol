@@ -7,15 +7,16 @@ import "./ERC20.sol";
 /*
 	Contract determines token
 */
-contract Token is ERC20, Pausable  {
+contract Token is ERC20, Pausable {
+
 
     using SafeMath for uint256;
 
     //Total amount of Gee
-    uint256 public totalSupply = 100 * (10**6) * (10**8);
+    uint256 public _totalSupply = 100 * (10**6) * (10**8);
 
     //Iend of crowdsale
-    uint256 public constant icoEnd = 222222222;
+    uint256 public constant ICO_END = 222222222;
 
     //Balances for each account
     mapping (address => uint256)  balances;
@@ -24,6 +25,11 @@ contract Token is ERC20, Pausable  {
 
     //Notifies users about the amount burnt
     event Burn(address indexed _from, uint256 _value);
+
+    //return _totalSupply of the Token
+    function totalSupply() external constant returns (uint256 totalTokenSupply) {
+        totalTokenSupply = _totalSupply;
+    }
 
     //What is the balance of a particular account?
     function balanceOf(address _owner)
@@ -94,11 +100,10 @@ contract Token is ERC20, Pausable  {
     }
 
     /**
-     * approve should be called when allowed[_spender] == 0.
      * To increment allowed value is better to use this function to avoid 2 calls
-     * (and wait until the first transaction is mined)
      * From MonolithDAO Token.sol
      */
+
     function increaseApproval(address _spender, uint256 _addedValue)
         external
         whenNotPaused
@@ -127,29 +132,28 @@ contract Token is ERC20, Pausable  {
         return true;
     }
 
-
     function burn(uint256 _value) external returns (bool success) {
         require(trusted[msg.sender]);
         //Subtract from the sender
         balances[msg.sender] = balances[msg.sender].SUB(_value);
-        //Update totalSupply
-        totalSupply = totalSupply.SUB(_value);
+        //Update _totalSupply
+        _totalSupply = _totalSupply.SUB(_value);
         Burn(msg.sender, _value);
         return true;
     }
 
     //Override transferOwnership()
-    function transferOwnership(address _newOwner) public afterCrowdsale  {
+    function transferOwnership(address _newOwner) public afterCrowdsale {
         super.transferOwnership(_newOwner);
     }
 
     //Override pause()
-    function pause() public afterCrowdsale  {
+    function pause() public afterCrowdsale {
         super.pause();
     }
 
     modifier canTransferOnCrowdsale (address _address) {
-        if (block.number < icoEnd) {
+        if (block.number <= ICO_END) {
             //Require the end of funding or msg.sender to be trusted
             require(trusted[_address]);
         }
@@ -158,7 +162,7 @@ contract Token is ERC20, Pausable  {
 
     //Some functions should work only after the Crowdsale
     modifier afterCrowdsale {
-        require(block.number > icoEnd);
+        require(block.number > ICO_END);
         _;
     }
 

@@ -4,8 +4,9 @@ import "./Trustable.sol";
 
 contract Pausable is Trustable {
 
-    //To check if ICO is paused
-    bool public paused = false;
+
+    //To check if Token is paused
+    bool public paused;
     //Block number on pause
     uint256 public pauseBlockNumber;
     //Block number on resume

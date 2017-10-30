@@ -1,7 +1,7 @@
 pragma solidity ^0.4.16;
 
 /*
-	@title GeeToken
+	@title GEEToken
 */
 
 import "./MigratableToken.sol";
@@ -11,62 +11,69 @@ import "./MigratableToken.sol";
 */
 contract GEEToken is MigratableToken {
 
+    
     //Name of the token
     string public constant name = "Geens Platform Token";
     //Symbol of the token
     string public constant symbol = "GEE";
-    //Number of decimals of Gee
+    //Number of decimals of GEE
     uint8 public constant decimals = 8;
 
     //Team allocation
+    //Team wallet that will be unlocked after ICO
+    address public constant TEAM0 = 0x3eC28367f42635098FA01dd33b9dd126247Fb4B1;
     //Team wallet that will be unlocked after 0.5 year after ICO
-    address public constant team1 = 0x3eC28367f42635098FA01dd33b9dd126247Fb4B1;
+    address public constant TEAM1 = 0x3eC28367f42635098FA01dd33b9dd126247Fb4B1;
     //Team wallet that will be unlocked after 1 year after ICO
-    address public constant team2 = 0xE2832C2Ff2754923B3172474F149630823ecb8D6;
+    address public constant TEAM2 = 0xE2832C2Ff2754923B3172474F149630823ecb8D6;
     //0.5 year after ICO
-    uint256 public constant blockTeam1 = 1835640;
+    uint256 public constant BLOCK_TEAM1 = 1835640;
     //1 year after ICO
-    uint256 public constant blockTeam2 = 1835650;
+    uint256 public constant BLOCK_TEAM2 = 1835650;
     //1st team wallet balance
     uint256 public team1Balance;
     //2nd team wallet balance
     uint256 public team2Balance;
 
+    //2.4%
+    uint256 private constant TEAM0_THOUSANDTH = 24;
     //3.6%
-    uint256 private constant team1Percent = 36;
+    uint256 private constant TEAM1_THOUSANDTH = 36;
     //6%
-    uint256 private constant team2Percent = 60;
+    uint256 private constant TEAM2_THOUSANDTH = 60;
     //88%
-    uint256 private constant icoAndCommunityPercent = 880;
+    uint256 private constant ICO_AND_COMMUNITY_THOUSANDTH = 880;
     //100%
-    uint256 private constant percent100 = 1000;
+    uint256 private constant DENOMINATOR = 1000;
 
     function GEEToken() {
-        uint256 icoAndCommunityTokens = totalSupply * icoAndCommunityPercent / percent100;
-    	//88% of totalSupply
+        uint256 icoAndCommunityTokens = _totalSupply * ICO_AND_COMMUNITY_THOUSANDTH / DENOMINATOR;
+    	//88% of _totalSupply
         balances[msg.sender] = icoAndCommunityTokens;
-        //3.6% of totalSupply
-        team1Balance = totalSupply * team1Percent / percent100;
-        //6% of totalSupply
-        team2Balance = totalSupply * team2Percent / percent100;
+        //2.4% of _totalSupply
+        balances[TEAM0] = _totalSupply * TEAM0_THOUSANDTH / DENOMINATOR;
+        //3.6% of _totalSupply
+        team1Balance = _totalSupply * TEAM1_THOUSANDTH / DENOMINATOR;
+        //6% of _totalSupply
+        team2Balance = _totalSupply * TEAM2_THOUSANDTH / DENOMINATOR;
 
         Transfer (this, msg.sender, icoAndCommunityTokens);
     }
 
     //Check if team wallet is unlocked
-    function unlockTeamTokens(address _address) external onlyOwner  {
-        if (_address == team1) {
-            require(blockTeam1 <= block.number);
+    function unlockTeamTokens(address _address) external onlyOwner {
+        if (_address == TEAM1) {
+            require(BLOCK_TEAM1 <= block.number);
             require (team1Balance > 0);
-            balances[team1] = team1Balance;
+            balances[TEAM1] = team1Balance;
             team1Balance = 0;
-            Transfer (this, team1, team1Balance);
-        } else if (_address == team2) {
-            require(blockTeam2 <= block.number);
+            Transfer (this, TEAM1, team1Balance);
+        } else if (_address == TEAM2) {
+            require(BLOCK_TEAM2 <= block.number);
             require (team2Balance > 0);
-            balances[team2] = team2Balance;
+            balances[TEAM2] = team2Balance;
             team2Balance = 0;
-            Transfer (this, team2, team2Balance);
+            Transfer (this, TEAM2, team2Balance);
         }
     }
 

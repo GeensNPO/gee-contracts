@@ -2,7 +2,7 @@
 
 ---
 
-**Last updated:** October 24, 2017
+**Last updated:** October 27, 2017
 
 ---
 
@@ -58,12 +58,17 @@
       - [**SafeMath**](#safemath)
         * [Description](#description-7)
         * [Functions](#functions-7)
-    + [Endnotes](#endnotes)
         
 ---
 
 ## Overview
 GEE token system consists of multiple smart contracts written in Solidity programming language. This system allows issuing a standards-compliant custom token on the Ethereum network. This documentation explains the purpose and the realisation (including technical details) of each of these contracts.
+
+These contracts were thoroughly tested and all parts were double checked many times. If you are a 'smart contracts' developer and see how these contracts can be optimized even better and made more efficient, please contact us.
+
+During the following days, these contracts will continue to be updated. Before launching them on the main Ethereum network, the block numbers and hard-coded addresses will be modified.
+
+The GEE Token sale will start on 7th of November, 2017. More details: https://tokensale.geens.com
 
 ---
 
@@ -101,13 +106,13 @@ This contract defines a standard ERC20 token with some extra functionalities. Th
 
 #### **Variables**
 ```javascript
-uint256 public totalSupply = 100 * (10**6) * (10**8);
+uint256 public _totalSupply = 100 * (10**6) * (10**8);
 ```
 Total supply of tokens is 100 million.
 <br>
 <br>
 ```javascript
-uint256 public constant icoEnd = 222222222;
+    uint256 public constant ICO_END = 222222222;
 ```
 A block number that indicates when the Crowdsale ends.
 <br>
@@ -129,6 +134,14 @@ A mapping that saves allowances of the users. For example, user A has approved u
 event Burn(address indexed _from, uint256 _value);
 ```
 The event that is triggered when tokens are burned. The indexed parameters allow filtering events by specific addresses.
+<br>
+<br>
+```javascript
+    function totalSupply() external constant returns (uint256 totalTokenSupply) {
+        totalTokenSupply = _totalSupply;
+    }
+ ```
+ A function that return total supply of the token.
 <br>
 <br>
 #### **Functions** 
@@ -234,15 +247,15 @@ To decrease allowed value is better to use this function to avoid 2 calls (and w
 <br>
 <br>
 ```javascript
-function burn(uint256 _value) external returns (bool success) {
-    require(trusted[msg.sender]);
-    //Subtract from the sender
-    balances[msg.sender] = balances[msg.sender].SUB(_value);
-    //Update totalSupply
-    totalSupply = totalSupply.SUB(_value);
-    Burn(msg.sender, _value);
-    return true;
-}
+    function burn(uint256 _value) external returns (bool success) {
+        require(trusted[msg.sender]);
+        //Subtract from the sender
+        balances[msg.sender] = balances[msg.sender].SUB(_value);
+        //Update _totalSupply
+        _totalSupply = _totalSupply.SUB(_value);
+        Burn(msg.sender, _value);
+        return true;
+    }
 ```
 Allows trusted address burning a specific amount of his tokens. This function is intended to be called after the Crowdsale to burn the unsold tokens.
 <br>
@@ -266,7 +279,7 @@ This function prohibits pausing the contract when the Crowdsale is active.
 #### **Modifiers**
 ```javascript
 modifier canTransferOnCrowdsale (address _address) {
-    if (block.number < icoEnd) {
+    if (block.number <= ICO_END) {
         //Require the end of funding or msg.sender to be trusted
         require(trusted[_address]);
     }
@@ -278,7 +291,7 @@ Only trusted addresses can call functions that are marked with this modifier.
 <br>
 ```javascript
 modifier afterCrowdsale {
-    require(block.number >= icoEnd);
+    require(block.number > ICO_END);
     _;
 }
 ```
@@ -314,25 +327,31 @@ Token has 8 decimal places. It cannot be changed later.
 <br>
 <br>
 ```javascript
-address public constant team1 = 0x3eC28367f42635098FA01dd33b9dd126247Fb4B1;
+address public constant TEAM0 = 0x3eC28367f42635098FA01dd33b9dd126247Fb4B1;
+```
+The zero address of the team that receives 2.4% of tokens.
+<br>
+<br>
+```javascript
+address public constant TEAM1 = 0x3eC28367f42635098FA01dd33b9dd126247Fb4B1;
 ```
 The first address of the team that receives 3.6% of tokens that can only be spent after the half of the year.
 <br>
 <br>
 ```javascript
-address public constant team2 = 0xE2832C2Ff2754923B3172474F149630823ecb8D6;
+address public constant TEAM2 = 0xE2832C2Ff2754923B3172474F149630823ecb8D6;
 ```
 Second address of the team that receives 6% of tokens that can only be spent after the year.
 <br>
 <br>
 ```javascript
-uint256 public constant blockTeam1 = 1835640;
+uint256 public constant BLOCK_TEAM1 = 1835640;
 ```
 A block number when the first team wallet's tokens are unlocked.
 <br>
 <br>
 ```javascript
-uint256 public constant blockTeam2 = 1835650;
+uint256 public constant BLOCK_TEAM2 = 1835650;
 ```
 A block number when the second team wallet's tokens are unlocked.
 <br>
@@ -350,25 +369,31 @@ Indicates how many tokens a second wallet of the team has.
 <br>
 <br>
 ```javascript
-uint256 constant team1Percent = 36;
+uint256 private constant TEAM0_THOUSANDTH = 24;
+```
+2.4%
+<br>
+<br>
+```javascript
+uint256 private constant TEAM1_THOUSANDTH = 36;
 ```
 3.6%
 <br>
 <br>
 ```javascript
-uint256 constant team2Percent = 60;
+uint256 private constant TEAM1_THOUSANDTH = 36;
 ```
 6%
 <br>
 <br>
 ```javascript
-uint256 constant icoAndCommunityPercent = 880;
+uint256 private constant ICO_AND_COMMUNITY_THOUSANDTH = 880;
 ```
 88%
 <br>
 <br>
 ```javascript
-uint256 constant percent100 = 1000;
+uint256 private constant DENOMINATOR = 1000;
 ```
 100%
 <br>
@@ -376,38 +401,40 @@ uint256 constant percent100 = 1000;
 
 #### **Functions**
 ```javascript
- function GEEToken() {
-        uint256 icoAndCommunityTokens = totalSupply * icoAndCommunityPercent / percent100;
-    	//88% of totalSupply
+function GEEToken() {
+        uint256 icoAndCommunityTokens = _totalSupply * ICO_AND_COMMUNITY_THOUSANDTH / DENOMINATOR;
+    	//88% of _totalSupply
         balances[msg.sender] = icoAndCommunityTokens;
-        //3.6% of totalSupply
-        team1Balance = totalSupply * team1Percent / percent100;
-        //6% of totalSupply
-        team2Balance = totalSupply * team2Percent / percent100;
+        //2.4% of _totalSupply
+        balances[TEAM0] = _totalSupply * TEAM0_THOUSANDTH / DENOMINATOR;
+        //3.6% of _totalSupply
+        team1Balance = _totalSupply * TEAM1_THOUSANDTH / DENOMINATOR;
+        //6% of _totalSupply
+        team2Balance = _totalSupply * TEAM2_THOUSANDTH / DENOMINATOR;
 
         Transfer (this, msg.sender, icoAndCommunityTokens);
-    }
-
+}
 ```
 Upon creation of the contract, 88% of tokens are allocated to the owner of the contract, 3.6% to the first team wallet and 6% to the second team wallet.
 <br>
 <br>
 ```javascript
-function unlockTeamTokens(address _address) external onlyOwner  {
-        if (_address == team1) {
-            require(blockTeam1 <= block.number);
-            require (team1Balance > 0);
-            balances[team1] = team1Balance;
-            team1Balance = 0;
-            Transfer (this, team1, team1Balance);
-        } else if (_address == team2) {
-            require(blockTeam2 <= block.number);
-            require (team2Balance > 0);
-            balances[team2] = team2Balance;
-            team2Balance = 0;
-            Transfer (this, team2, team2Balance);
-        }
+function unlockTeamTokens(address _address) external onlyOwner {
+    if (_address == TEAM1) {
+        require(BLOCK_TEAM1 <= block.number);
+        require (team1Balance > 0);
+        balances[TEAM1] = team1Balance;
+        team1Balance = 0;
+        Transfer (this, TEAM1, team1Balance);
+    } else if (_address == TEAM2) {
+        require(BLOCK_TEAM2 <= block.number);
+        require (team2Balance > 0);
+        balances[TEAM2] = team2Balance;
+        team2Balance = 0;
+        Transfer (this, TEAM2, team2Balance);
     }
+}
+
 
 ```
 A function that allows an owner of the contract unlocking tokens for the team wallet when specified block number is reached. Tokens are transferred to a specified wallet.
@@ -424,25 +451,25 @@ A contract that is responsible for handling the Crowdsale operations. It accepts
 <br>
 #### **Variables**
 ```javascript
-uint256 public sold;
+uint256 public soldTokens;
 ```
 Counts how many tokens are sold.
 <br>
 <br>
 ```javascript
-uint256 public hardCapInToken = 67 * (10**6) * (10**8);
+uint256 public hardCapInTokens = 67 * (10**6) * (10**8);
 ```
 Hard Cap of the Crowdsale is 67 million (67% of total amount of tokens). This is the maximum amount of tokens that could be issued.
 <br>
 <br>
 ```javascript
-uint256 public constant minEther = 0.03 ether;
+uint256 public constant MIN_ETHER = 0.03 ether;
 ```
 A minimum contribution in Ether.
 <br>
 <br>
 ```javascript
-uint256 public constant maxEther = 1000 ether;
+uint256 public constant MAX_ETHER = 1000 ether;
 ```
 A maximum contribution in Ether.
 <br>
@@ -454,37 +481,37 @@ An address where the received Ether is forwarded.
 <br>
 <br>
 ```javascript
-uint256 public constant day = 5082;
+uint256 public constant DAY = 5082;
 ```
 Indicates how many blocks are mined per day.
 <br>
 <br>
 ```javascript
-uint256 public constant startBlockNumber = 4506960;
+uint256 public constant START_BLOCK_NUMBER = 4506960;
 ```
 A number of the block when the Crowdsale should start.
 <br>
 <br>
 ```javascript
-uint256 public tier2 = startBlockNumber.ADD(day.MUL(3));
+uint256 public TIER2 = START_BLOCK_NUMBER.ADD(DAY.MUL(3));
 ```
 A number of the block when the tier2Price price should be active.
 <br>
 <br>
 ```javascript
-uint256 public tier3 = startBlockNumber.ADD(day.MUL(10));
+uint256 public TIER3 = START_BLOCK_NUMBER.ADD(DAY.MUL(10));
 ```
 A number of the block when the tier3Price price should be active.
 <br>
 <br>
 ```javascript
-uint256 public tier4 = startBlockNumber.ADD(day.MUL(20));
+uint256 public TIER4 = START_BLOCK_NUMBER.ADD(DAY.MUL(20));
 ```
 A number of the block when the tier4Price price should be active.
 <br>
 <br>
 ```javascript
-uint256 public endBlockNumber = startBlockNumber.ADD(day.MUL(30));
+uint256 public endBlockNumber = START_BLOCK_NUMBER.ADD(DAY.MUL(30));
 ```
 A number of the block when the Crowdsale should end.
 <br>
@@ -496,25 +523,25 @@ A price (in Wei) of one token.
 <br>
 <br>
 ```javascript
-uint256 public constant tier1Price = 6000000;
+uint256 public constant TIER1_PRICE = 6000000;
 ```
 A price (in Wei) of one token (when tier1 is active).
 <br>
 <br>
 ```javascript
-uint256 public constant tier2Price = 6700000;
+uint256 public constant TIER2_PRICE = 6700000;
 ```
 A price (in Wei) of one token (when tier2 is active).
 <br>
 <br>
 ```javascript
-uint256 public constant tier3Price = 7400000;
+uint256 public constant TIER3_PRICE = 7400000;
 ```
 A price (in Wei) of one token (when tier3 is active).
 <br>
 <br>
 ```javascript
-uint256 public constant tier4Price = 8200000;
+uint256 public constant TIER4_PRICE = 8200000;
 ```
 A price (in Wei) of one token (when tier4 is active).
 <br>
@@ -526,7 +553,7 @@ Reference to the Token contract.
 <br>
 <br>
 ```javascript
-uint256 public constant softCapInEther = 13500 ether;
+uint256 public constant SOFT_CAP_IN_ETHER = 13500 ether;
 ```
 Soft Cap of the Crowdsale is 13'500 Ether. If the soft cap is not reached, contributors will be able to refund their Ether.
 <br>
@@ -544,13 +571,13 @@ The total amount of Ether collected during the Crowdsale.
 <br>
 <br>
 ```javascript
-bool public stopped = false;
+bool public stopped;
 ```
 Indicates whether the Crowdsale is stopped or not.
 <br>
 <br>
 ```javascript
-uint256 public constant gee100 = 100 * (10**8);
+uint256 public constant GEE100 = 100 * (10**8);
 ```
 A constant corresponding to 100 GEE tokens.
 <br>
@@ -561,12 +588,6 @@ A constant corresponding to 100 GEE tokens.
 event Buy (address indexed _who, uint256 _amount, uint256 indexed _price);
 ```
 An event that is triggered when someone buys GEE tokens.
-<br>
-<br>
-```javascript
-event ChangeFund (address indexed _fund);
-```
-An event that is triggered when the fund address is changed.
 <br>
 <br>
 ```javascript
@@ -589,68 +610,51 @@ Before deploying this contract, Token contract must already be deployed. After t
 <br>
 <br>
 ```javascript
-function() payable {
-    if (isCrowdsaleActive()) {
-        buy();
-    } else {
-        require (msg.sender == owner);
-    }
+function() external payable {
+        if (isCrowdsaleActive()) {
+            buy();
+        } else { //after crowdsale owner can send back eth for refund
+            require (msg.sender == fund || msg.sender == owner);
+        }
 }
 ```
 A Fallback function that is called when someone sends Ether to the contract.
 <br>
 <br>
 ```javascript
-function changeFund(address _fund)
-external
-notZeroAddress(_fund)
-onlyOwner
-{
-    fund = _fund;
-    ChangeFund (_fund);
-}
-```
-A function that allows an owner of the contract changing address where collected Ether is forwarded.
-<br>
-<br>
-```javascript
 function finalize() external  {
-    if (sold < (hardCap - gee100)) {
-        require(block.number > endBlockNumber);
+        require(soldTokens != hardCapInTokens);
+        if (soldTokens < (hardCapInTokens - GEE100)) {
+            require(block.number > endBlockNumber);
+        }
+        gee.burn(hardCapInTokens.SUB(soldTokens));
+        hardCapInTokens = soldTokens;
     }
-    require(sold != hardCap);
-    gee.burn(hardCap.SUB(sold));
-    hardCap = sold;
-}
 ```
 If the Crowdsale ends and the hard cap is not reached, this functions burns the unsold tokens.
 <br>
 <br>
 ```javascript
-function buy()
+    function buy()
     public
     payable
     {
         uint256 amountWei = msg.value;
         uint256 blocks = block.number;
 
-        //Is crowdsale started
-        require(startBlockNumber <= blocks);
-        //Is crowdsale ended
-        require(endBlockNumber >= blocks);
         //Ether limitation
-        require(amountWei >= minEther);
-        require(amountWei <= maxEther);
+        require(amountWei >= MIN_ETHER);
+        require(amountWei <= MAX_ETHER);
 
         price = getPrice();
         //Count how many GEE sender can buy
         uint256 amount = amountWei / price;
-        //Add amount to sold
-        sold = sold.ADD(amount);
+        //Add amount to soldTokens
+        soldTokens = soldTokens.ADD(amount);
 
-        require(sold <= hardCapInToken);
+        require(soldTokens <= hardCapInTokens);
 
-        if (sold == hardCapInToken) {
+        if (soldTokens == hardCapInTokens) {
             endBlockNumber = blocks;
         }
 
@@ -661,8 +665,9 @@ function buy()
         //Transfer amount of Gee coins to msg.sender
         gee.transfer(msg.sender, amount);
 
-        //Transfer contract Ether to Geens
+        //Transfer contract Ether to fund
         fund.transfer(this.balance);
+
         Buy(msg.sender, amount, price);
     }
 
@@ -673,7 +678,7 @@ A function responsible for issuing tokens for a contributor. The minimum amount 
 ```javascript
 function isCrowdsaleActive() public constant returns (bool) {
 
-        if (endBlockNumber < block.number || stopped || startBlockNumber > block.number){
+        if (endBlockNumber < block.number || stopped || START_BLOCK_NUMBER > block.number){
             return false;
         }
         return true;
@@ -688,19 +693,19 @@ c) Crowdsale has been stopped due to emergency situation
 <br>
 ```javascript
 function getPrice()
-internal
-constant
-returns (uint256)
-{
-    if (block.number >= tier4) {
-        return tier4Price;
-    } else if (block.number >= tier3){
-        return tier3Price;
-    } else if (block.number >= tier2){
-        return tier2Price;
+    internal
+    constant
+    returns (uint256)
+    {
+     if (block.number < TIER2) {
+        return TIER1_PRICE;
+    } else if (block.number < TIER3) {
+        return TIER2_PRICE;
+    } else if (block.number < TIER4) {
+        return TIER3_PRICE;
     }
-
-    return tier1Price;
+        
+    return TIER4_PRICE;
 }
 ```
 Calculates which tier is currently active and returns the corresponding price.
@@ -717,16 +722,24 @@ Allows an owner of the contract stopping the Crowdsale in case of a serious issu
 <br>
 ```javascript
 function refund() external
-{
-    uint256 refund = bought[msg.sender];
-    require (!isCrowdsaleActive());
-    require (collected < softCap);
-    msg.sender.transfer(refund);
-    bought[msg.sender] = 0;
-    Refund(msg.sender, refund);
-}
+    {
+        uint256 refund = bought[msg.sender];
+        require (!isCrowdsaleActive());
+        require (collected < SOFT_CAP_IN_ETHER);
+        bought[msg.sender] = 0;
+        msg.sender.transfer(refund);
+        Refund(msg.sender, refund);
+    }
 ```
 A function that allows contributors receive their contributions back in case a soft cap is not reached or the Crowdsale was stopped due to an emergency situation.
+<br>
+<br>
+```javascript
+    function drainEther() external onlyOwner {
+        fund.transfer(this.balance);
+    }
+```
+A function that allows owner to drain Ether from contract to a specified funds address.
 <br>
 <br>
 
@@ -757,22 +770,23 @@ The event that is triggered when a new owner is assigned to the contract. The in
 <br>
 #### **Functions**
 ```javascript
-function Ownable() {
-    owner = msg.sender;
-}
+    function Ownable() {
+        owner = msg.sender;
+        OwnershipTransferred (address(0), owner);
+    }
 ```
 A constructor that is called upon creation of the contract. It assigns the ownership of this contract to the creator.
 <br>
 <br>
 ```javascript
-function transferOwnership(address _newOwner)
-    public
-    onlyOwner
-    notZeroAddress(_newOwner)
-{
-    owner = _newOwner;
-    OwnershipTransferred(owner, _newOwner);
-}
+    function transferOwnership(address _newOwner)
+        public
+        onlyOwner
+        notZeroAddress(_newOwner)
+    {
+        owner = _newOwner;
+        OwnershipTransferred(msg.sender, _newOwner);
+    }
 ```
 A function that allows current owner of the contract transferring the ownership to another address.
 <br>
@@ -827,6 +841,7 @@ The event that is triggered when a trusted address is unassigned. The indexed pa
 ```javascript
 function Trustable() {
     trusted[msg.sender] = true;
+    AddTrusted(msg.sender);
 }
 ```
 The creator of the contract is initially added to the trusted addresses list.
@@ -834,9 +849,9 @@ The creator of the contract is initially added to the trusted addresses list.
 <br>
 ```javascript
 function addTrusted(address _address)
+        external
         onlyOwner
         notZeroAddress(_address)
-        external
 {
         trusted[_address] = true;
         AddTrusted(_address);
@@ -868,7 +883,7 @@ This contract allows pausing the contract in case of emergency situation. It als
 
 #### **Variables**
 ```javascript
-bool public paused = false;
+bool public paused;
 ```
 Indicates whether the contract is paused or not.
 <br>
@@ -998,7 +1013,7 @@ function migrate(uint256 _value) external {
     //Migrates user balance
     balances[msg.sender] = balances[msg.sender].SUB(_value);
     //Migrates total supply
-    totalSupply = totalSupply.SUB(_value);
+    _totalSupply = _totalSupply.SUB(_value);
     //Counts migrated tokens
     totalMigrated = totalMigrated.ADD(_value);
     //Upgrade agent reissues the tokens
@@ -1010,21 +1025,26 @@ If migration is enabled, transfer the balance from the old contract to the new o
 <br>
 <br>
 ```javascript
-function setMigrateAgent(MigrateAgent _agent) onlyOwner notZeroAddress(_agent) afterCrowdsale external {
-    //cannot interrupt migrating
-    require(getMigrateState() != MigrateState.Migrating);
-    //set migrate agent
-    migrateAgent = _agent;
-    //Emit event
-    MigrateAgentSet(migrateAgent);
-}
+ function setMigrateAgent(MigrateAgent _agent)
+        external
+        onlyOwner
+        notZeroAddress(_agent)
+        afterCrowdsale
+    {
+        //cannot interrupt migrating
+        require(getMigrateState() != MigrateState.Migrating);
+        //set migrate agent
+        migrateAgent = _agent;
+        //Emit event
+        MigrateAgentSet(migrateAgent);
+    }
 ```
 Set a reference to the new Token. This is only possible when the migration has not already been started.
 <br>
 <br>
 ```javascript
 function getMigrateState() public constant returns (MigrateState) {
-    if (block.number < icoEnd) {
+    if (block.number <= ICO_END) {
         //Migration is not allowed on funding
         return MigrateState.NotAllowed;
     } else if (address(migrateAgent) == address(0)) {
@@ -1085,11 +1105,5 @@ This function returns the product of a and b. It checks that the result is corre
 <br>
 
 ---
-
-## Endnotes
-
-These contracts were thoroughly tested and all parts were double checked many times. If you are a smart contracts developer and see how these contracts can be optimized even better and made more efficient, please contact us.
-
-During the following days, these contracts will continue to be updated. Before launching them on the main Ethereum network, the block numbers and hard-coded addresses will be modified.
 
 The GEE Token sale will start on 7th of November, 2017. More details: https://tokensale.geens.com
