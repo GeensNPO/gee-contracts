@@ -1,4 +1,4 @@
-pragma solidity ^0.4.16;
+pragma solidity 0.4.17;
 
 import "./Ownable.sol";
 import "./SafeMath.sol";
@@ -7,9 +7,11 @@ import "./SafeMath.sol";
 /*	Interface of GeeToken contract */
 contract Token {
 
-    function transfer(address _to, uint256 _value) external;
+    function transfer(address _to, uint256 _value) 
+        external;
 
-    function burn(uint256 _value) external;
+    function burn(uint256 _value) 
+        external;
 
 }
 
@@ -68,6 +70,7 @@ contract Crowdsale is Ownable {
     //FUNCTION
     //Payable - can store ETH
     function Crowdsale(Token _geeToken)
+        public
         notZeroAddress(_geeToken)
         payable
     {
