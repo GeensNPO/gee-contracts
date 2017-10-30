@@ -75,8 +75,6 @@ contract Crowdsale is Ownable {
 
     //Keep track of buyings
     event Buy (address indexed _who, uint256 _amount, uint256 indexed _price);
-    //Keep track of fund addresses
-    event ChangeFund (address indexed _fund);
     //Keep track of refunding
     event Refund (address indexed _who, uint256 _amount);
 
@@ -95,21 +93,8 @@ contract Crowdsale is Ownable {
         if (isCrowdsaleActive()) {
             buy();
         } else { //after crowdsale owner can send back eth for refund
-            require (msg.sender == owner);
+            require (msg.sender == fund || msg.sender == owner);
         }
-    }
-
-    /*
-        Owner can change fund address
-    */
-
-    function changeFund(address _fund)
-    external
-    notZeroAddress(_fund)
-    onlyOwner
-    {
-        fund = _fund;
-        ChangeFund (_fund);
     }
 
     /*
@@ -204,5 +189,9 @@ contract Crowdsale is Ownable {
         bought[msg.sender] = 0;
         msg.sender.transfer(refund);
         Refund(msg.sender, refund);
+    }
+
+    function drainEther() external onlyOwner {
+        fund.transfer(this.balance);
     }
 }

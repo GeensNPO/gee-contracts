@@ -583,12 +583,6 @@ An event that is triggered when someone buys GEE tokens.
 <br>
 <br>
 ```javascript
-event ChangeFund (address indexed _fund);
-```
-An event that is triggered when the fund address is changed.
-<br>
-<br>
-```javascript
 event Refund (address indexed _who, uint256 _amount);
 ```
 An event that is triggered when contributor refunds his Ether.
@@ -612,24 +606,11 @@ function() external payable {
         if (isCrowdsaleActive()) {
             buy();
         } else { //after crowdsale owner can send back eth for refund
-            require (msg.sender == owner);
+            require (msg.sender == fund || msg.sender == owner);
         }
 }
 ```
 A Fallback function that is called when someone sends Ether to the contract.
-<br>
-<br>
-```javascript
-function changeFund(address _fund)
-external
-notZeroAddress(_fund)
-onlyOwner
-{
-    fund = _fund;
-    ChangeFund (_fund);
-}
-```
-A function that allows an owner of the contract changing address where collected Ether is forwarded.
 <br>
 <br>
 ```javascript
@@ -743,6 +724,14 @@ function refund() external
     }
 ```
 A function that allows contributors receive their contributions back in case a soft cap is not reached or the Crowdsale was stopped due to an emergency situation.
+<br>
+<br>
+```javascript
+    function drainEther() external onlyOwner {
+        fund.transfer(this.balance);
+    }
+```
+A function that allows owner to drain Ether from contract to a specified funds address.
 <br>
 <br>
 
