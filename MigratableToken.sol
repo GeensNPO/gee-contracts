@@ -43,7 +43,7 @@ contract MigratableToken is Token {
         //Migrates user balance
         balances[msg.sender] = balances[msg.sender].SUB(_value);
         //Migrates total supply
-        totalSupply = totalSupply.SUB(_value);
+        _totalSupply = _totalSupply.SUB(_value);
         //Counts migrated tokens
         totalMigrated = totalMigrated.ADD(_value);
         //Upgrade agent reissues the tokens

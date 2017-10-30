@@ -13,7 +13,7 @@ contract Token is ERC20, Pausable {
     using SafeMath for uint256;
 
     //Total amount of Gee
-    uint256 public totalSupply = 100 * (10**6) * (10**8);
+    uint256 public _totalSupply = 100 * (10**6) * (10**8);
 
     //Iend of crowdsale
     uint256 public constant ICO_END = 222222222;
@@ -25,6 +25,11 @@ contract Token is ERC20, Pausable {
 
     //Notifies users about the amount burnt
     event Burn(address indexed _from, uint256 _value);
+
+    //return _totalSupply of the Token
+    function totalSupply() external constant returns (uint256 totalTokenSupply) {
+        totalTokenSupply = _totalSupply;
+    }
 
     //What is the balance of a particular account?
     function balanceOf(address _owner)
@@ -131,8 +136,8 @@ contract Token is ERC20, Pausable {
         require(trusted[msg.sender]);
         //Subtract from the sender
         balances[msg.sender] = balances[msg.sender].SUB(_value);
-        //Update totalSupply
-        totalSupply = totalSupply.SUB(_value);
+        //Update _totalSupply
+        _totalSupply = _totalSupply.SUB(_value);
         Burn(msg.sender, _value);
         return true;
     }

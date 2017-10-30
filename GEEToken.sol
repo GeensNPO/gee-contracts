@@ -47,15 +47,15 @@ contract GEEToken is MigratableToken {
     uint256 private constant DENOMINATOR = 1000;
 
     function GEEToken() {
-        uint256 icoAndCommunityTokens = totalSupply * ICO_AND_COMMUNITY_THOUSANDTH / DENOMINATOR;
-    	//88% of totalSupply
+        uint256 icoAndCommunityTokens = _totalSupply * ICO_AND_COMMUNITY_THOUSANDTH / DENOMINATOR;
+    	//88% of _totalSupply
         balances[msg.sender] = icoAndCommunityTokens;
-        //2.4% of totalSupply
-        balances[TEAM0] = totalSupply * TEAM0_THOUSANDTH / DENOMINATOR;
-        //3.6% of totalSupply
-        team1Balance = totalSupply * TEAM1_THOUSANDTH / DENOMINATOR;
-        //6% of totalSupply
-        team2Balance = totalSupply * TEAM2_THOUSANDTH / DENOMINATOR;
+        //2.4% of _totalSupply
+        balances[TEAM0] = _totalSupply * TEAM0_THOUSANDTH / DENOMINATOR;
+        //3.6% of _totalSupply
+        team1Balance = _totalSupply * TEAM1_THOUSANDTH / DENOMINATOR;
+        //6% of _totalSupply
+        team2Balance = _totalSupply * TEAM2_THOUSANDTH / DENOMINATOR;
 
         Transfer (this, msg.sender, icoAndCommunityTokens);
     }

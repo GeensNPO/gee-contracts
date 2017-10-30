@@ -106,7 +106,7 @@ This contract defines a standard ERC20 token with some extra functionalities. Th
 
 #### **Variables**
 ```javascript
-uint256 public totalSupply = 100 * (10**6) * (10**8);
+uint256 public _totalSupply = 100 * (10**6) * (10**8);
 ```
 Total supply of tokens is 100 million.
 <br>
@@ -134,6 +134,14 @@ A mapping that saves allowances of the users. For example, user A has approved u
 event Burn(address indexed _from, uint256 _value);
 ```
 The event that is triggered when tokens are burned. The indexed parameters allow filtering events by specific addresses.
+<br>
+<br>
+```javascript
+    function totalSupply() external constant returns (uint256 totalTokenSupply) {
+        totalTokenSupply = _totalSupply;
+    }
+ ```
+ A function that return total supply of the token.
 <br>
 <br>
 #### **Functions** 
@@ -239,15 +247,15 @@ To decrease allowed value is better to use this function to avoid 2 calls (and w
 <br>
 <br>
 ```javascript
-function burn(uint256 _value) external returns (bool success) {
-    require(trusted[msg.sender]);
-    //Subtract from the sender
-    balances[msg.sender] = balances[msg.sender].SUB(_value);
-    //Update totalSupply
-    totalSupply = totalSupply.SUB(_value);
-    Burn(msg.sender, _value);
-    return true;
-}
+    function burn(uint256 _value) external returns (bool success) {
+        require(trusted[msg.sender]);
+        //Subtract from the sender
+        balances[msg.sender] = balances[msg.sender].SUB(_value);
+        //Update _totalSupply
+        _totalSupply = _totalSupply.SUB(_value);
+        Burn(msg.sender, _value);
+        return true;
+    }
 ```
 Allows trusted address burning a specific amount of his tokens. This function is intended to be called after the Crowdsale to burn the unsold tokens.
 <br>
@@ -394,17 +402,17 @@ uint256 private constant DENOMINATOR = 1000;
 #### **Functions**
 ```javascript
 function GEEToken() {
-    uint256 icoAndCommunityTokens = totalSupply * ICO_AND_COMMUNITY_THOUSANDTH / DENOMINATOR;
-	//88% of totalSupply
-     balances[msg.sender] = icoAndCommunityTokens;
-    //2.4% of totalSupply
-    balances[TEAM0] = totalSupply * TEAM0_THOUSANDTH / DENOMINATOR;
-    //3.6% of totalSupply
-    team1Balance = totalSupply * TEAM1_THOUSANDTH / DENOMINATOR;
-     //6% of totalSupply
-    team2Balance = totalSupply * TEAM2_THOUSANDTH / DENOMINATOR;
+        uint256 icoAndCommunityTokens = _totalSupply * ICO_AND_COMMUNITY_THOUSANDTH / DENOMINATOR;
+    	//88% of _totalSupply
+        balances[msg.sender] = icoAndCommunityTokens;
+        //2.4% of _totalSupply
+        balances[TEAM0] = _totalSupply * TEAM0_THOUSANDTH / DENOMINATOR;
+        //3.6% of _totalSupply
+        team1Balance = _totalSupply * TEAM1_THOUSANDTH / DENOMINATOR;
+        //6% of _totalSupply
+        team2Balance = _totalSupply * TEAM2_THOUSANDTH / DENOMINATOR;
 
-    Transfer (this, msg.sender, icoAndCommunityTokens);
+        Transfer (this, msg.sender, icoAndCommunityTokens);
 }
 ```
 Upon creation of the contract, 88% of tokens are allocated to the owner of the contract, 3.6% to the first team wallet and 6% to the second team wallet.
@@ -1005,7 +1013,7 @@ function migrate(uint256 _value) external {
     //Migrates user balance
     balances[msg.sender] = balances[msg.sender].SUB(_value);
     //Migrates total supply
-    totalSupply = totalSupply.SUB(_value);
+    _totalSupply = _totalSupply.SUB(_value);
     //Counts migrated tokens
     totalMigrated = totalMigrated.ADD(_value);
     //Upgrade agent reissues the tokens

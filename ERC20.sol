@@ -13,6 +13,8 @@ contract ERC20 {
 
     event Approval(address indexed _owner, address indexed _spender, uint256 _value);
 
+    function totalSupply() external constant returns (uint);
+
     function balanceOf(address _owner) external constant returns (uint256);
 
     function transfer(address _to, uint256 _value) external returns (bool);
