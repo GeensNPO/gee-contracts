@@ -131,9 +131,7 @@ contract Crowdsale is Ownable {
         collected = collected.ADD(amountWei);                       //counts ETH
         bought[msg.sender] = bought[msg.sender].ADD(amountWei);
 
-        
         gee.transfer(msg.sender, amount);                           //Transfer amount of Gee coins to msg.sender
-
         fund.transfer(this.balance);                                //Transfer contract Ether to fund
 
         Buy(msg.sender, amount, price);
