@@ -535,6 +535,12 @@ A number of the block when the Crowdsale should end.
 <br>
 <br>
 ```javascript
+uint256 public maxEndBlockNumber = START_BLOCK_NUMBER.ADD(DAY.MUL(60));
+```
+A max number of the block the Crowdsale can end.
+<br>
+<br>
+```javascript
 uint256 public price;
 ```
 A price (in Wei) of one token.
@@ -586,12 +592,6 @@ Indicates how many Ether has each contributor sent to this contract.
 uint256 public collected;
 ```
 The total amount of Ether collected during the Crowdsale.
-<br>
-<br>
-```javascript
-bool public stopped;
-```
-Indicates whether the Crowdsale is stopped or not.
 <br>
 <br>
 ```javascript
@@ -696,7 +696,7 @@ A function responsible for issuing tokens for a contributor. The minimum amount 
 ```javascript
 function isCrowdsaleActive() public constant returns (bool) {
 
-        if (endBlockNumber < block.number || stopped || START_BLOCK_NUMBER > block.number){
+        if (endBlockNumber < block.number || START_BLOCK_NUMBER > block.number){
             return false;
         }
         return true;
@@ -730,12 +730,15 @@ Calculates which tier is currently active and returns the corresponding price.
 <br>
 <br>
 ```javascript
-function stopInEmergency () external onlyOwner {
-    require (!stopped);
-    stopped = true;
-}
+    function setEndBlockNumber(uint256 _newEndBlockNumber) external onlyOwner {
+        require(isCrowdsaleActive());
+        require(_newEndBlockNumber >= block.number);
+        require(_newEndBlockNumber <= maxEndBlockNumber);
+
+        endBlockNumber = _newEndBlockNumber;
+    }
 ```
-Allows an owner of the contract stopping the Crowdsale in case of a serious issue. This can only be invoked once, so there is no possibility to resume the Crowdsale after. When Crowdsale is stopped in such way, refunds are enabled immediately.
+Allows owner setting the new end block number to extend/close Crowdsale.
 <br>
 <br>
 ```javascript

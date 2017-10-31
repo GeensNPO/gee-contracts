@@ -1,4 +1,4 @@
-pragma solidity 0.4.17;
+pragma solidity ^0.4.16;
 
 import "./Ownable.sol";
 import "./SafeMath.sol";
@@ -39,8 +39,8 @@ contract Crowdsale is Ownable {
     uint256 public TIER3 = START_BLOCK_NUMBER.ADD(DAY.MUL(10));                     //Start + 10 days ( 3 days + 7 days)
     uint256 public TIER4 = START_BLOCK_NUMBER.ADD(DAY.MUL(20));                     //Start + 20 days ( 3 days + 7 days + 10 days)
     uint256 public endBlockNumber = START_BLOCK_NUMBER.ADD(DAY.MUL(30));            //Start + 30 days
+    uint256 public maxEndBlockNumber = START_BLOCK_NUMBER.ADD(DAY.MUL(60));         //End + 30 days
 
-    
     uint256 public price;                                       //GEE price
    
     uint256 public constant TIER1_PRICE = 6000000;              //Price in 1st tier
@@ -53,7 +53,6 @@ contract Crowdsale is Ownable {
     uint256 public constant SOFT_CAP_IN_ETHER = 13500 ether;    //softcap in ETH
 
     uint256 public collected;                                   //saves how much ETH was collected
-    bool    public stopped;                                     //to check if ICO is stopped
 
     uint256 public constant GEE100 = 100 * (10**8);
 
@@ -145,7 +144,7 @@ contract Crowdsale is Ownable {
         returns (bool) 
     {
 
-        if (endBlockNumber < block.number || stopped || START_BLOCK_NUMBER > block.number) {
+        if (endBlockNumber < block.number || START_BLOCK_NUMBER > block.number) {
             return false;
         }
         return true;
@@ -170,16 +169,6 @@ contract Crowdsale is Ownable {
     }
 
 
-    /* Stop CROWDSALE in emergency */
-    function stopInEmergency() 
-        external 
-        onlyOwner 
-    {
-        require (!stopped);
-        stopped = true;
-    }
-
-
     /* Refund, if the soft cap is not reached */
     function refund() 
         external 
@@ -198,6 +187,17 @@ contract Crowdsale is Ownable {
         onlyOwner 
     {
         fund.transfer(this.balance);
+    }
+
+    /*
+    Allows owner setting the new end block number to extend/close Crowdsale.
+    */
+    function setEndBlockNumber(uint256 _newEndBlockNumber) external onlyOwner {
+        require(isCrowdsaleActive());
+        require(_newEndBlockNumber >= block.number);
+        require(_newEndBlockNumber <= maxEndBlockNumber);
+
+        endBlockNumber = _newEndBlockNumber;
     }
 
 }
