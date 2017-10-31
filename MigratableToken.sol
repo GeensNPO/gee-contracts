@@ -17,7 +17,7 @@ contract MigrateAgent {
 }
 
 contract MigratableToken is Token {
-    
+
     MigrateAgent public migrateAgent;
 
     //Total migrated tokens
@@ -55,10 +55,10 @@ contract MigratableToken is Token {
         Set migrating agent and start migrating
     */
     function setMigrateAgent(MigrateAgent _agent)
-        external
-        onlyOwner
-        notZeroAddress(_agent)
-        afterCrowdsale
+    external
+    onlyOwner
+    notZeroAddress(_agent)
+    afterCrowdsale
     {
         //cannot interrupt migrating
         require(getMigrateState() != MigrateState.Migrating);
@@ -72,7 +72,7 @@ contract MigratableToken is Token {
         Migrating status
     */
     function getMigrateState() public constant returns (MigrateState) {
-        if (block.number <= ICO_END) {
+        if (block.number <= crowdsaleEndBlock) {
             //Migration is not allowed on funding
             return MigrateState.NotAllowed;
         } else if (address(migrateAgent) == address(0)) {

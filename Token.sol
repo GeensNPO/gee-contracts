@@ -15,8 +15,10 @@ contract Token is ERC20, Pausable {
     //Total amount of Gee
     uint256 public _totalSupply = 100 * (10**6) * (10**8);
 
-    //Iend of crowdsale
-    uint256 public constant ICO_END = 222222222;
+    //end of crowdsale
+    uint256 public crowdsaleEndBlock = 222222222;
+    //end of crowdsale
+    uint256 public constant crowdsaleMaxEndBlock = 444444444;
 
     //Balances for each account
     mapping (address => uint256)  balances;
@@ -142,6 +144,14 @@ contract Token is ERC20, Pausable {
         return true;
     }
 
+    function updateCrowdsaleEndBlock (uint256 _crowdsaleEndBlock) {
+        //Crowdsale must be active
+        require(block.number <= crowdsaleEndBlock);
+        //Transfers can only be unlocked earlier
+        require(_crowdsaleEndBlock < crowdsaleMaxEndBlock);
+        crowdsaleEndBlock = _crowdsaleEndBlock;
+    }
+
     //Override transferOwnership()
     function transferOwnership(address _newOwner) public afterCrowdsale {
         super.transferOwnership(_newOwner);
@@ -153,7 +163,7 @@ contract Token is ERC20, Pausable {
     }
 
     modifier canTransferOnCrowdsale (address _address) {
-        if (block.number <= ICO_END) {
+        if (block.number <= crowdsaleEndBlock) {
             //Require the end of funding or msg.sender to be trusted
             require(trusted[_address]);
         }
@@ -162,7 +172,7 @@ contract Token is ERC20, Pausable {
 
     //Some functions should work only after the Crowdsale
     modifier afterCrowdsale {
-        require(block.number > ICO_END);
+        require(block.number > crowdsaleEndBlock);
         _;
     }
 

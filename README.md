@@ -112,9 +112,15 @@ Total supply of tokens is 100 million.
 <br>
 <br>
 ```javascript
-    uint256 public constant ICO_END = 222222222;
+ uint256 public crowdsaleEndBlock = 222222222;
 ```
 A block number that indicates when the Crowdsale ends.
+<br>
+<br>
+```javascript
+uint256 public constant crowdsaleMaxEndBlock = 444444444;
+```
+A block number that indicates the max possible end block number.
 <br>
 <br>
 ```javascript
@@ -261,6 +267,18 @@ Allows trusted address burning a specific amount of his tokens. This function is
 <br>
 <br>
 ```javascript
+    function updateCrowdsaleEndBlock (uint256 _crowdsaleEndBlock) {
+        //Crowdsale must be active
+        require(block.number <= crowdsaleEndBlock);
+        //Transfers can only be unlocked earlier
+        require(_crowdsaleEndBlock < crowdsaleMaxEndBlock);
+        crowdsaleEndBlock = _crowdsaleEndBlock;
+    }
+```
+Allows owner setting the new end block number to extend/close Crowdsale.
+<br>
+<br>
+```javascript
 function transferOwnership(address _newOwner) public afterCrowdsale  {
     super.transferOwnership(_newOwner);
 }
@@ -279,7 +297,7 @@ This function prohibits pausing the contract when the Crowdsale is active.
 #### **Modifiers**
 ```javascript
 modifier canTransferOnCrowdsale (address _address) {
-    if (block.number <= ICO_END) {
+    if (block.number <= crowdsaleEndBlock) {
         //Require the end of funding or msg.sender to be trusted
         require(trusted[_address]);
     }
@@ -291,7 +309,7 @@ Only trusted addresses can call functions that are marked with this modifier.
 <br>
 ```javascript
 modifier afterCrowdsale {
-    require(block.number > ICO_END);
+    require(block.number > crowdsaleEndBlock);
     _;
 }
 ```
@@ -1044,7 +1062,7 @@ Set a reference to the new Token. This is only possible when the migration has n
 <br>
 ```javascript
 function getMigrateState() public constant returns (MigrateState) {
-    if (block.number <= ICO_END) {
+    if (block.number <= crowdsaleEndBlock) {
         //Migration is not allowed on funding
         return MigrateState.NotAllowed;
     } else if (address(migrateAgent) == address(0)) {
