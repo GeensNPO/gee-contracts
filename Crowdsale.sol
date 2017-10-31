@@ -124,7 +124,7 @@ contract Crowdsale is Ownable {
 
         require(soldTokens <= hardCapInTokens);
 
-        if (soldTokens == hardCapInTokens) {
+        if (soldTokens >= (hardCapInTokens - GEE100)) {
             endBlockNumber = blocks;
         }
         

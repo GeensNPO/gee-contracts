@@ -654,7 +654,7 @@ If the Crowdsale ends and the hard cap is not reached, this functions burns the 
 
         require(soldTokens <= hardCapInTokens);
 
-        if (soldTokens == hardCapInTokens) {
+        if (soldTokens >= (hardCapInTokens - GEE100)) {
             endBlockNumber = blocks;
         }
 
