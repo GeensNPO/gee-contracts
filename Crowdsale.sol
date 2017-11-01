@@ -64,6 +64,7 @@ contract Crowdsale is Ownable {
     //EVENT
     event Buy    (address indexed _who, uint256 _amount, uint256 indexed _price);   //Keep track of buyings
     event Refund (address indexed _who, uint256 _amount);                           //Keep track of refunding
+    event CrowdsaleEndChanged (uint256 _crowdsaleEnd, uint256 _newCrowdsaleEnd);    //Notifies users about end block change
 
 
     //FUNCTION
@@ -197,7 +198,9 @@ contract Crowdsale is Ownable {
         require(_newEndBlockNumber >= block.number);
         require(_newEndBlockNumber <= maxEndBlockNumber);
 
+        uint256 currentEndBlockNumber = endBlockNumber;
         endBlockNumber = _newEndBlockNumber;
+        CrowdsaleEndChanged (currentEndBlockNumber, _newEndBlockNumber);
     }
 
 }

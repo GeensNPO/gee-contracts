@@ -27,6 +27,8 @@ contract Token is ERC20, Pausable {
 
     //Notifies users about the amount burnt
     event Burn(address indexed _from, uint256 _value);
+    //Notifies users about end block change
+    event CrowdsaleEndChanged (uint256 _crowdsaleEnd, uint256 _newCrowdsaleEnd);
 
     //return _totalSupply of the Token
     function totalSupply() external constant returns (uint256 totalTokenSupply) {
@@ -144,12 +146,15 @@ contract Token is ERC20, Pausable {
         return true;
     }
 
-    function updateCrowdsaleEndBlock (uint256 _crowdsaleEndBlock) {
-        //Crowdsale must be active
-        require(block.number <= crowdsaleEndBlock);
-        //Transfers can only be unlocked earlier
-        require(_crowdsaleEndBlock < crowdsaleMaxEndBlock);
+    function updateCrowdsaleEndBlock (uint256 _crowdsaleEndBlock) external onlyOwner {
+
+        require(block.number <= crowdsaleEndBlock);                 //Crowdsale must be active
+        require(_crowdsaleEndBlock >= block.number);
+        require(_crowdsaleEndBlock <= crowdsaleMaxEndBlock);        //Transfers can only be unlocked earlier
+
+        uint256 currentEndBlockNumber = crowdsaleEndBlock;
         crowdsaleEndBlock = _crowdsaleEndBlock;
+        CrowdsaleEndChanged (currentEndBlockNumber, _crowdsaleEndBlock);
     }
 
     //Override transferOwnership()

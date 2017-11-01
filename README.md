@@ -2,7 +2,7 @@
 
 ---
 
-**Last updated:** October 27, 2017
+**Last updated:** November 1, 2017
 
 ---
 
@@ -143,6 +143,12 @@ The event that is triggered when tokens are burned. The indexed parameters allow
 <br>
 <br>
 ```javascript
+event CrowdsaleEndChanged (uint256 _crowdsaleEnd, uint256 _newCrowdsaleEnd);
+```
+The event that is triggered when crowdsale end block has been changed. 
+<br>
+<br>
+```javascript
     function totalSupply() external constant returns (uint256 totalTokenSupply) {
         totalTokenSupply = _totalSupply;
     }
@@ -267,12 +273,15 @@ Allows trusted address burning a specific amount of his tokens. This function is
 <br>
 <br>
 ```javascript
-    function updateCrowdsaleEndBlock (uint256 _crowdsaleEndBlock) {
-        //Crowdsale must be active
-        require(block.number <= crowdsaleEndBlock);
-        //Transfers can only be unlocked earlier
-        require(_crowdsaleEndBlock < crowdsaleMaxEndBlock);
+    function updateCrowdsaleEndBlock (uint256 _crowdsaleEndBlock) external onlyOwner {
+
+        require(block.number <= crowdsaleEndBlock);                 //Crowdsale must be active
+        require(_crowdsaleEndBlock >= block.number);
+        require(_crowdsaleEndBlock <= crowdsaleMaxEndBlock);        //Transfers can only be unlocked earlier
+
+        uint256 currentEndBlockNumber = crowdsaleEndBlock;
         crowdsaleEndBlock = _crowdsaleEndBlock;
+        CrowdsaleEndChanged (currentEndBlockNumber, _crowdsaleEndBlock);
     }
 ```
 Allows owner setting the new end block number to extend/close Crowdsale.
@@ -614,6 +623,12 @@ event Refund (address indexed _who, uint256 _amount);
 An event that is triggered when contributor refunds his Ether.
 <br>
 <br>
+```javascript
+event CrowdsaleEndChanged (uint256 _crowdsaleEnd, uint256 _newCrowdsaleEnd);
+```
+The event that is triggered when crowdsale end block has been changed. 
+<br>
+<br>
 
 #### **Functions**
 ```javascript
@@ -735,7 +750,9 @@ Calculates which tier is currently active and returns the corresponding price.
         require(_newEndBlockNumber >= block.number);
         require(_newEndBlockNumber <= maxEndBlockNumber);
 
+        uint256 currentEndBlockNumber = endBlockNumber;
         endBlockNumber = _newEndBlockNumber;
+        CrowdsaleEndChanged (currentEndBlockNumber, _newEndBlockNumber);
     }
 ```
 Allows owner setting the new end block number to extend/close Crowdsale.
