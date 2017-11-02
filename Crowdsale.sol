@@ -112,7 +112,8 @@ contract Crowdsale is Ownable {
         uint256 amountWei = msg.value;
         uint256 blocks = block.number;
 
-        
+
+        require (isCrowdsaleActive());
         require(amountWei >= MIN_ETHER);                            //Ether limitation
         require(amountWei <= MAX_ETHER);
 

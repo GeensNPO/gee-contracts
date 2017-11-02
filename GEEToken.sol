@@ -35,29 +35,38 @@ contract GEEToken is MigratableToken {
     //2nd team wallet balance
     uint256 public team2Balance;
 
+    //Community allocation
+    address public constant COMMUNITY = 0x3eC28367f42635098FA01dd33b9dd126247Fb4B1;
+
     //2.4%
     uint256 private constant TEAM0_THOUSANDTH = 24;
     //3.6%
     uint256 private constant TEAM1_THOUSANDTH = 36;
     //6%
     uint256 private constant TEAM2_THOUSANDTH = 60;
-    //88%
-    uint256 private constant ICO_AND_COMMUNITY_THOUSANDTH = 880;
+    //67%
+    uint256 private constant ICO_THOUSANDTH = 670;
+    //22%
+    uint256 private constant COMMUNITY_THOUSANDTH = 210;
     //100%
     uint256 private constant DENOMINATOR = 1000;
 
     function GEEToken() {
-        uint256 icoAndCommunityTokens = _totalSupply * ICO_AND_COMMUNITY_THOUSANDTH / DENOMINATOR;
-    	//88% of _totalSupply
-        balances[msg.sender] = icoAndCommunityTokens;
+        //88% of _totalSupply
+        balances[msg.sender] = _totalSupply * ICO_THOUSANDTH / DENOMINATOR;
         //2.4% of _totalSupply
         balances[TEAM0] = _totalSupply * TEAM0_THOUSANDTH / DENOMINATOR;
         //3.6% of _totalSupply
         team1Balance = _totalSupply * TEAM1_THOUSANDTH / DENOMINATOR;
         //6% of _totalSupply
         team2Balance = _totalSupply * TEAM2_THOUSANDTH / DENOMINATOR;
+        //22% of _totalSupply
+        balances[COMMUNITY] =  _totalSupply * COMMUNITY_THOUSANDTH / DENOMINATOR;
 
-        Transfer (this, msg.sender, icoAndCommunityTokens);
+        Transfer (this, msg.sender, balances[msg.sender]);
+        Transfer (this, TEAM0, balances[TEAM0]);
+        Transfer (this, COMMUNITY, balances[COMMUNITY]);
+
     }
 
     //Check if team wallet is unlocked

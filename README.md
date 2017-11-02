@@ -2,7 +2,7 @@
 
 ---
 
-**Last updated:** November 1, 2017
+**Last updated:** November 2, 2017
 
 ---
 
@@ -106,7 +106,7 @@ This contract defines a standard ERC20 token with some extra functionalities. Th
 
 #### **Variables**
 ```javascript
-uint256 public _totalSupply = 100 * (10**6) * (10**8);
+uint256 _totalSupply = 100 * (10**6) * (10**8);
 ```
 Total supply of tokens is 100 million.
 <br>
@@ -372,6 +372,12 @@ Second address of the team that receives 6% of tokens that can only be spent aft
 <br>
 <br>
 ```javascript
+address public constant COMMUNITY = 0x3eC28367f42635098FA01dd33b9dd126247Fb4B1;
+```
+Community address receives 21% of tokens.
+<br>
+<br>
+```javascript
 uint256 public constant BLOCK_TEAM1 = 1835640;
 ```
 A block number when the first team wallet's tokens are unlocked.
@@ -414,9 +420,15 @@ uint256 private constant TEAM1_THOUSANDTH = 36;
 <br>
 <br>
 ```javascript
-uint256 private constant ICO_AND_COMMUNITY_THOUSANDTH = 880;
+    uint256 private constant ICO_THOUSANDTH = 670;
 ```
-88%
+67%
+<br>
+<br>
+```javascript
+    uint256 private constant COMMUNITY_THOUSANDTH = 210;
+```
+21%
 <br>
 <br>
 ```javascript
@@ -428,19 +440,23 @@ uint256 private constant DENOMINATOR = 1000;
 
 #### **Functions**
 ```javascript
-function GEEToken() {
-        uint256 icoAndCommunityTokens = _totalSupply * ICO_AND_COMMUNITY_THOUSANDTH / DENOMINATOR;
-    	//88% of _totalSupply
-        balances[msg.sender] = icoAndCommunityTokens;
+    function GEEToken() {
+        //88% of _totalSupply
+        balances[msg.sender] = _totalSupply * ICO_THOUSANDTH / DENOMINATOR;
         //2.4% of _totalSupply
         balances[TEAM0] = _totalSupply * TEAM0_THOUSANDTH / DENOMINATOR;
         //3.6% of _totalSupply
         team1Balance = _totalSupply * TEAM1_THOUSANDTH / DENOMINATOR;
         //6% of _totalSupply
         team2Balance = _totalSupply * TEAM2_THOUSANDTH / DENOMINATOR;
+        //22% of _totalSupply
+        balances[COMMUNITY] =  _totalSupply * COMMUNITY_THOUSANDTH / DENOMINATOR;
 
-        Transfer (this, msg.sender, icoAndCommunityTokens);
-}
+        Transfer (this, msg.sender, balances[msg.sender]);
+        Transfer (this, TEAM0, balances[TEAM0]);
+        Transfer (this, COMMUNITY, balances[COMMUNITY]);
+
+    }
 ```
 Upon creation of the contract, 88% of tokens are allocated to the owner of the contract, 3.6% to the first team wallet and 6% to the second team wallet.
 <br>
@@ -675,6 +691,9 @@ If the Crowdsale ends and the hard cap is not reached, this functions burns the 
         uint256 amountWei = msg.value;
         uint256 blocks = block.number;
 
+        require (isCrowdsaleActive());
+
+        
         //Ether limitation
         require(amountWei >= MIN_ETHER);
         require(amountWei <= MAX_ETHER);

@@ -13,7 +13,7 @@ contract Token is ERC20, Pausable {
     using SafeMath for uint256;
 
     //Total amount of Gee
-    uint256 public _totalSupply = 100 * (10**6) * (10**8);
+    uint256 _totalSupply = 100 * (10**6) * (10**8);
 
     //end of crowdsale
     uint256 public crowdsaleEndBlock = 222222222;
