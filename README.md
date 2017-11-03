@@ -2,7 +2,7 @@
 
 ---
 
-**Last updated:** November 2, 2017
+**Last updated:** November 3, 2017
 
 ---
 
@@ -602,7 +602,7 @@ Reference to the Token contract.
 <br>
 <br>
 ```javascript
-uint256 public constant SOFT_CAP_IN_ETHER = 13500 ether;
+uint256 public constant SOFT_CAP_IN_ETHER = 4000 ether;
 ```
 Soft Cap of the Crowdsale is 13'500 Ether. If the soft cap is not reached, contributors will be able to refund their Ether.
 <br>

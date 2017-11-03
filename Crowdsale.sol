@@ -50,7 +50,7 @@ contract Crowdsale is Ownable {
 
     Token public gee;                                           //GeeToken contract
 
-    uint256 public constant SOFT_CAP_IN_ETHER = 13500 ether;    //softcap in ETH
+    uint256 public constant SOFT_CAP_IN_ETHER = 4000 ether;    //softcap in ETH
 
     uint256 public collected;                                   //saves how much ETH was collected
 
