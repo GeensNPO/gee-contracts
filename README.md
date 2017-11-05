@@ -25,7 +25,7 @@
         * [Description](#description-1)
         * [Variables](#variables-1)
         * [Functions](#functions-1)
-      - [**Crowdsale**](#crowdsale)
+      - [**GEECrowdsale**](#crowdsale)
         * [Description](#description-2)
         * [Variables](#variables-2)
         * [Events](#events-1)
@@ -77,7 +77,7 @@ The GEE Token sale will start on 7th of November, 2017. More details: https://to
 ### Main contracts
 * Token
 * GEEToken
-* Crowdsale
+* GEECrowdsale
 
 ### Auxiliary contracts
 * Ownable
@@ -486,7 +486,7 @@ A function that allows an owner of the contract unlocking tokens for the team wa
 
 ---
 
-### Crowdsale
+### GEECrowdsale
 
 #### **Description**
 A contract that is responsible for handling the Crowdsale operations. It accepts Ether from contributors and issues the corresponding number of tokens.
@@ -648,7 +648,7 @@ The event that is triggered when crowdsale end block has been changed.
 
 #### **Functions**
 ```javascript
-function Crowdsale(Token _geeToken)
+function GEECrowdsale(Token _geeToken)
     notZeroAddress(_geeToken)
     payable
 {
@@ -671,7 +671,7 @@ A Fallback function that is called when someone sends Ether to the contract.
 <br>
 <br>
 ```javascript
-function finalize() external  {
+function finalize() external  onlyOwner{
         require(soldTokens != hardCapInTokens);
         if (soldTokens < (hardCapInTokens - GEE100)) {
             require(block.number > endBlockNumber);

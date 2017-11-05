@@ -16,7 +16,7 @@ contract Token {
 }
 
 
-contract Crowdsale is Ownable {
+contract GEECrowdsale is Ownable {
 
     using SafeMath for uint256;
 
@@ -69,7 +69,7 @@ contract Crowdsale is Ownable {
 
     //FUNCTION
     //Payable - can store ETH
-    function Crowdsale(Token _geeToken)
+    function GEECrowdsale (Token _geeToken)
         public
         notZeroAddress(_geeToken)
         payable
@@ -93,14 +93,15 @@ contract Crowdsale is Ownable {
 
     /* Burn unsold GEE after crowdsale */
     function finalize() 
-        external 
+        external
+        onlyOwner
     {
         require(soldTokens != hardCapInTokens);
         if (soldTokens < (hardCapInTokens - GEE100)) {
             require(block.number > endBlockNumber);
         }
-        gee.burn(hardCapInTokens.SUB(soldTokens));
         hardCapInTokens = soldTokens;
+        gee.burn(hardCapInTokens.SUB(soldTokens));
     }
 
 
