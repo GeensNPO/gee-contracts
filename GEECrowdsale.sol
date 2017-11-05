@@ -32,14 +32,13 @@ contract GEECrowdsale is Ownable {
     address fund = 0x48a2909772b049D0eA3A0979eE05eDF37119738d;  //Address where funds are forwarded during the ICO
 
     
-    uint256 public constant DAY = 5082;                         //Mined blocks per DAY
-    uint256 public constant START_BLOCK_NUMBER = 4506960;       //Start block
+    uint256 public constant START_BLOCK_NUMBER = 4506850;       //Start block
     
-    uint256 public TIER2 = START_BLOCK_NUMBER.ADD(DAY.MUL(3));                      //Start + 3 days
-    uint256 public TIER3 = START_BLOCK_NUMBER.ADD(DAY.MUL(10));                     //Start + 10 days ( 3 days + 7 days)
-    uint256 public TIER4 = START_BLOCK_NUMBER.ADD(DAY.MUL(20));                     //Start + 20 days ( 3 days + 7 days + 10 days)
-    uint256 public endBlockNumber = START_BLOCK_NUMBER.ADD(DAY.MUL(30));            //Start + 30 days
-    uint256 public maxEndBlockNumber = START_BLOCK_NUMBER.ADD(DAY.MUL(60));         //End + 30 days
+    uint256 public constant TIER2 = 4525700;                      //Start + 3 days
+    uint256 public constant TIER3 = 4569600;                     //Start + 10 days ( 3 days + 7 days)
+    uint256 public constant TIER4 = 4632300;                     //Start + 20 days ( 3 days + 7 days + 10 days)
+    uint256 public endBlockNumber = 4695000;                        //Start + 30 days
+    uint256 public constant MAX_END_BLOCK_NUMBER = 4890000;         //End + 30 days
 
     uint256 public price;                                       //GEE price
    
@@ -198,7 +197,7 @@ contract GEECrowdsale is Ownable {
     function setEndBlockNumber(uint256 _newEndBlockNumber) external onlyOwner {
         require(isCrowdsaleActive());
         require(_newEndBlockNumber >= block.number);
-        require(_newEndBlockNumber <= maxEndBlockNumber);
+        require(_newEndBlockNumber <= MAX_END_BLOCK_NUMBER);
 
         uint256 currentEndBlockNumber = endBlockNumber;
         endBlockNumber = _newEndBlockNumber;

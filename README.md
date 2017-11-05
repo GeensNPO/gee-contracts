@@ -2,7 +2,7 @@
 
 ---
 
-**Last updated:** November 3, 2017
+**Last updated:** November 5, 2017
 
 ---
 
@@ -112,13 +112,13 @@ Total supply of tokens is 100 million.
 <br>
 <br>
 ```javascript
- uint256 public crowdsaleEndBlock = 222222222;
+ uint256 public crowdsaleEndBlock = 4695000;
 ```
 A block number that indicates when the Crowdsale ends.
 <br>
 <br>
 ```javascript
-uint256 public constant crowdsaleMaxEndBlock = 444444444;
+uint256 public constant MAX_END_BLOCK_NUMBER = 4890000;
 ```
 A block number that indicates the max possible end block number.
 <br>
@@ -530,37 +530,37 @@ Indicates how many blocks are mined per day.
 <br>
 <br>
 ```javascript
-uint256 public constant START_BLOCK_NUMBER = 4506960;
+uint256 public constant START_BLOCK_NUMBER = 4506850;
 ```
 A number of the block when the Crowdsale should start.
 <br>
 <br>
 ```javascript
-uint256 public TIER2 = START_BLOCK_NUMBER.ADD(DAY.MUL(3));
+uint256 public TIER2 = 4525700;
 ```
 A number of the block when the tier2Price price should be active.
 <br>
 <br>
 ```javascript
-uint256 public TIER3 = START_BLOCK_NUMBER.ADD(DAY.MUL(10));
+uint256 public TIER3 = 4569600;
 ```
 A number of the block when the tier3Price price should be active.
 <br>
 <br>
 ```javascript
-uint256 public TIER4 = START_BLOCK_NUMBER.ADD(DAY.MUL(20));
+uint256 public TIER4 = 4632300;
 ```
 A number of the block when the tier4Price price should be active.
 <br>
 <br>
 ```javascript
-uint256 public endBlockNumber = START_BLOCK_NUMBER.ADD(DAY.MUL(30));
+uint256 public endBlockNumber = 4695000;
 ```
 A number of the block when the Crowdsale should end.
 <br>
 <br>
 ```javascript
-uint256 public maxEndBlockNumber = START_BLOCK_NUMBER.ADD(DAY.MUL(60));
+uint256 public constant MAX_END_BLOCK_NUMBER = 4890000;
 ```
 A max number of the block the Crowdsale can end.
 <br>
@@ -1149,16 +1149,6 @@ function SUB (uint256 a, uint256 b) internal returns (uint256)  {
 ```
 This function returns the difference between a and b. It checks that a is not lower than b. If "assert" fails, all the gas provided is consumed.
 <br>
-<br>
-```javascript
-function MUL (uint256 a, uint256 b) internal returns (uint256)  {
-    uint256 c = a * b;
-    assert(a == 0 || c / a == b);
-    return c;
-}
-```
-This function returns the product of a and b. It checks that the result is correct (what we actually expect). If "assert" fails, all the gas provided is consumed.
-
 <br>
 
 ---

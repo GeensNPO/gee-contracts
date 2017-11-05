@@ -16,9 +16,9 @@ contract Token is ERC20, Pausable {
     uint256 _totalSupply = 100 * (10**6) * (10**8);
 
     //end of crowdsale
-    uint256 public crowdsaleEndBlock = 222222222;
+    uint256 public crowdsaleEndBlock = 4695000;
     //end of crowdsale
-    uint256 public constant crowdsaleMaxEndBlock = 444444444;
+    uint256 public constant MAX_END_BLOCK_NUMBER = 4890000;
 
     //Balances for each account
     mapping (address => uint256)  balances;
@@ -150,7 +150,7 @@ contract Token is ERC20, Pausable {
 
         require(block.number <= crowdsaleEndBlock);                 //Crowdsale must be active
         require(_crowdsaleEndBlock >= block.number);
-        require(_crowdsaleEndBlock <= crowdsaleMaxEndBlock);        //Transfers can only be unlocked earlier
+        require(_crowdsaleEndBlock <= MAX_END_BLOCK_NUMBER);        //Transfers can only be unlocked earlier
 
         uint256 currentEndBlockNumber = crowdsaleEndBlock;
         crowdsaleEndBlock = _crowdsaleEndBlock;
