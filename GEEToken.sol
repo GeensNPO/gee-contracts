@@ -27,9 +27,9 @@ contract GEEToken is MigratableToken {
     //Team wallet that will be unlocked after 1 year after ICO
     address public constant TEAM2 = 0x4902A52F95d9D47531Bed079B5B028c7F89ad47b;
     //0.5 year after ICO
-    uint256 public constant BLOCK_TEAM1 = 1835640;
+    uint256 public constant UNLOCK_TEAM_1 = 1528372800;
     //1 year after ICO
-    uint256 public constant BLOCK_TEAM2 = 1835650;
+    uint256 public constant UNLOCK_TEAM_2 = 1544184000;
     //1st team wallet balance
     uint256 public team1Balance;
     //2nd team wallet balance
@@ -72,13 +72,13 @@ contract GEEToken is MigratableToken {
     //Check if team wallet is unlocked
     function unlockTeamTokens(address _address) external onlyOwner {
         if (_address == TEAM1) {
-            require(BLOCK_TEAM1 <= block.number);
+            require(UNLOCK_TEAM_1 <= now);
             require (team1Balance > 0);
             balances[TEAM1] = team1Balance;
             team1Balance = 0;
             Transfer (this, TEAM1, balances[TEAM1]);
         } else if (_address == TEAM2) {
-            require(BLOCK_TEAM2 <= block.number);
+            require(UNLOCK_TEAM_2 <= now);
             require (team2Balance > 0);
             balances[TEAM2] = team2Balance;
             team2Balance = 0;

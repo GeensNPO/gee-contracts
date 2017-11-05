@@ -378,15 +378,15 @@ Community address receives 21% of tokens.
 <br>
 <br>
 ```javascript
-uint256 public constant BLOCK_TEAM1 = 1835640;
+ uint256 public constant UNLOCK_TEAM_1 = 1528372800;
 ```
-A block number when the first team wallet's tokens are unlocked.
+A timestamp when the first team wallet's tokens are unlocked.
 <br>
 <br>
 ```javascript
-uint256 public constant BLOCK_TEAM2 = 1835650;
+ uint256 public constant UNLOCK_TEAM_2 = 1544184000;
 ```
-A block number when the second team wallet's tokens are unlocked.
+A timestamp when the second team wallet's tokens are unlocked.
 <br>
 <br>
 ```javascript
@@ -464,20 +464,19 @@ Upon creation of the contract, 88% of tokens are allocated to the owner of the c
 ```javascript
     function unlockTeamTokens(address _address) external onlyOwner {
         if (_address == TEAM1) {
-            require(BLOCK_TEAM1 <= block.number);
+            require(UNLOCK_TEAM_1 <= now);
             require (team1Balance > 0);
             balances[TEAM1] = team1Balance;
             team1Balance = 0;
             Transfer (this, TEAM1, balances[TEAM1]);
         } else if (_address == TEAM2) {
-            require(BLOCK_TEAM2 <= block.number);
+            require(UNLOCK_TEAM_2 <= now);
             require (team2Balance > 0);
             balances[TEAM2] = team2Balance;
             team2Balance = 0;
             Transfer (this, TEAM2, balances[TEAM2]);
         }
     }
-
 
 ```
 A function that allows an owner of the contract unlocking tokens for the team wallet when specified block number is reached. Tokens are transferred to a specified wallet.
