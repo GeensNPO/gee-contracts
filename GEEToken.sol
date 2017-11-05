@@ -52,7 +52,7 @@ contract GEEToken is MigratableToken {
     uint256 private constant DENOMINATOR = 1000;
 
     function GEEToken() {
-        //88% of _totalSupply
+        //67% of _totalSupply
         balances[msg.sender] = _totalSupply * ICO_THOUSANDTH / DENOMINATOR;
         //2.4% of _totalSupply
         balances[TEAM0] = _totalSupply * TEAM0_THOUSANDTH / DENOMINATOR;
