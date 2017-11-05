@@ -449,7 +449,7 @@ uint256 private constant DENOMINATOR = 1000;
         team1Balance = _totalSupply * TEAM1_THOUSANDTH / DENOMINATOR;
         //6% of _totalSupply
         team2Balance = _totalSupply * TEAM2_THOUSANDTH / DENOMINATOR;
-        //22% of _totalSupply
+        //21% of _totalSupply
         balances[COMMUNITY] =  _totalSupply * COMMUNITY_THOUSANDTH / DENOMINATOR;
 
         Transfer (this, msg.sender, balances[msg.sender]);
@@ -462,21 +462,21 @@ Upon creation of the contract, 88% of tokens are allocated to the owner of the c
 <br>
 <br>
 ```javascript
-function unlockTeamTokens(address _address) external onlyOwner {
-    if (_address == TEAM1) {
-        require(BLOCK_TEAM1 <= block.number);
-        require (team1Balance > 0);
-        balances[TEAM1] = team1Balance;
-        team1Balance = 0;
-        Transfer (this, TEAM1, team1Balance);
-    } else if (_address == TEAM2) {
-        require(BLOCK_TEAM2 <= block.number);
-        require (team2Balance > 0);
-        balances[TEAM2] = team2Balance;
-        team2Balance = 0;
-        Transfer (this, TEAM2, team2Balance);
+    function unlockTeamTokens(address _address) external onlyOwner {
+        if (_address == TEAM1) {
+            require(BLOCK_TEAM1 <= block.number);
+            require (team1Balance > 0);
+            balances[TEAM1] = team1Balance;
+            team1Balance = 0;
+            Transfer (this, TEAM1, balances[TEAM1]);
+        } else if (_address == TEAM2) {
+            require(BLOCK_TEAM2 <= block.number);
+            require (team2Balance > 0);
+            balances[TEAM2] = team2Balance;
+            team2Balance = 0;
+            Transfer (this, TEAM2, balances[TEAM2]);
+        }
     }
-}
 
 
 ```

@@ -46,7 +46,7 @@ contract GEEToken is MigratableToken {
     uint256 private constant TEAM2_THOUSANDTH = 60;
     //67%
     uint256 private constant ICO_THOUSANDTH = 670;
-    //22%
+    //21%
     uint256 private constant COMMUNITY_THOUSANDTH = 210;
     //100%
     uint256 private constant DENOMINATOR = 1000;
@@ -60,7 +60,7 @@ contract GEEToken is MigratableToken {
         team1Balance = _totalSupply * TEAM1_THOUSANDTH / DENOMINATOR;
         //6% of _totalSupply
         team2Balance = _totalSupply * TEAM2_THOUSANDTH / DENOMINATOR;
-        //22% of _totalSupply
+        //21% of _totalSupply
         balances[COMMUNITY] =  _totalSupply * COMMUNITY_THOUSANDTH / DENOMINATOR;
 
         Transfer (this, msg.sender, balances[msg.sender]);
@@ -76,13 +76,13 @@ contract GEEToken is MigratableToken {
             require (team1Balance > 0);
             balances[TEAM1] = team1Balance;
             team1Balance = 0;
-            Transfer (this, TEAM1, team1Balance);
+            Transfer (this, TEAM1, balances[TEAM1]);
         } else if (_address == TEAM2) {
             require(BLOCK_TEAM2 <= block.number);
             require (team2Balance > 0);
             balances[TEAM2] = team2Balance;
             team2Balance = 0;
-            Transfer (this, TEAM2, team2Balance);
+            Transfer (this, TEAM2, balances[TEAM2]);
         }
     }
 
