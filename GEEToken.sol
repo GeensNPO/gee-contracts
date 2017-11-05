@@ -21,11 +21,11 @@ contract GEEToken is MigratableToken {
 
     //Team allocation
     //Team wallet that will be unlocked after ICO
-    address public constant TEAM0 = 0x3eC28367f42635098FA01dd33b9dd126247Fb4B1;
+    address public constant TEAM0 = 0x9B4df4ac63B6049DD013090d3F639Fd2EA5A02d3;
     //Team wallet that will be unlocked after 0.5 year after ICO
-    address public constant TEAM1 = 0x3eC28367f42635098FA01dd33b9dd126247Fb4B1;
+    address public constant TEAM1 = 0x4df9348239f6C1260Fc5d0611755cc1EF830Ff6c;
     //Team wallet that will be unlocked after 1 year after ICO
-    address public constant TEAM2 = 0xE2832C2Ff2754923B3172474F149630823ecb8D6;
+    address public constant TEAM2 = 0x4902A52F95d9D47531Bed079B5B028c7F89ad47b;
     //0.5 year after ICO
     uint256 public constant BLOCK_TEAM1 = 1835640;
     //1 year after ICO
@@ -36,7 +36,7 @@ contract GEEToken is MigratableToken {
     uint256 public team2Balance;
 
     //Community allocation
-    address public constant COMMUNITY = 0x3eC28367f42635098FA01dd33b9dd126247Fb4B1;
+    address public constant COMMUNITY = 0x265FC1d98f3C0D42e4273F542917525C3c3F925A;
 
     //2.4%
     uint256 private constant TEAM0_THOUSANDTH = 24;

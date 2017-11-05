@@ -354,25 +354,25 @@ Token has 8 decimal places. It cannot be changed later.
 <br>
 <br>
 ```javascript
-address public constant TEAM0 = 0x3eC28367f42635098FA01dd33b9dd126247Fb4B1;
+address public constant TEAM0 = 0x9B4df4ac63B6049DD013090d3F639Fd2EA5A02d3;
 ```
 The zero address of the team that receives 2.4% of tokens.
 <br>
 <br>
 ```javascript
-address public constant TEAM1 = 0x3eC28367f42635098FA01dd33b9dd126247Fb4B1;
+address public constant TEAM1 = 0x4df9348239f6C1260Fc5d0611755cc1EF830Ff6c;
 ```
 The first address of the team that receives 3.6% of tokens that can only be spent after the half of the year.
 <br>
 <br>
 ```javascript
-address public constant TEAM2 = 0xE2832C2Ff2754923B3172474F149630823ecb8D6;
+address public constant TEAM2 = 0x4902A52F95d9D47531Bed079B5B028c7F89ad47b;
 ```
 Second address of the team that receives 6% of tokens that can only be spent after the year.
 <br>
 <br>
 ```javascript
-address public constant COMMUNITY = 0x3eC28367f42635098FA01dd33b9dd126247Fb4B1;
+address public constant COMMUNITY = 0x265FC1d98f3C0D42e4273F542917525C3c3F925A;
 ```
 Community address receives 21% of tokens.
 <br>
@@ -518,7 +518,7 @@ A maximum contribution in Ether.
 <br>
 <br>
 ```javascript
-address fund = 0x77E32B38a4AfdAb4dA3863a1de198809170644Df;
+address fund = 0x48a2909772b049D0eA3A0979eE05eDF37119738d;
 ```
 An address where the received Ether is forwarded.
 <br>

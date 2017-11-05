@@ -29,7 +29,7 @@ contract GEECrowdsale is Ownable {
     uint256 public constant MAX_ETHER = 1000 ether;             //Max amount of Ether
 
     
-    address fund = 0x77E32B38a4AfdAb4dA3863a1de198809170644Df;  //Address where funds are forwarded during the ICO
+    address fund = 0x48a2909772b049D0eA3A0979eE05eDF37119738d;  //Address where funds are forwarded during the ICO
 
     
     uint256 public constant DAY = 5082;                         //Mined blocks per DAY
